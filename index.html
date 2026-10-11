@@ -879,22 +879,37 @@ const OPT = { mastZ: -1.05, boomY: 1.25, luff: 4.2, boomLen: 4.0 };
   sh.lineTo(-1.05, -2.5);
   sh.quadraticCurveTo(-1.3, -2.5, -1.3, -2.25);
   sh.bezierCurveTo(-1.3, -1.2, -1.2, 1.2, -0.95, 2.5);
-  const g = new THREE.ExtrudeGeometry(sh, { depth: 0.9, bevelEnabled: true, bevelThickness: 0.08, bevelSize: 0.08, bevelSegments: 2, curveSegments: 8 });
+  // åpent skrog: en vegg med hull i midten, og et eget gulv inni
+  const WALL = 0.15;
+  const sx = (1.3 - WALL) / 1.3, sy = (2.5 - WALL) / 2.5;
+  const ring = new THREE.Shape(sh.getPoints(14));
+  ring.holes.push(new THREE.Path(sh.getPoints(14).map(q => new THREE.Vector2(q.x * sx, q.y * sy))));
+  const g = new THREE.ExtrudeGeometry(ring, { depth: 0.9, bevelEnabled: false, curveSegments: 14 });
   g.rotateX(-Math.PI / 2);
   const gp = g.attributes.position;
   for (let i = 0; i < gp.count; i++){ if (gp.getY(i) < 0.3) gp.setX(i, gp.getX(i) * 0.72); }
   g.computeVertexNormals();
-  const hullO = new THREE.Mesh(g, mat('ocean-300'));
+  // gruppe 0 = topp og bunn (gul list), gruppe 1 = sidene
+  const hullO = new THREE.Mesh(g, [mat('sun-500'), mat('ocean-500')]);
   hullO.position.y = -0.4;
   optG.add(hullO);
-  const rimG = new THREE.ShapeGeometry(sh, 8); rimG.rotateX(-Math.PI / 2);
-  const rim = new THREE.Mesh(rimG, mat('sun-500')); rim.position.y = 0.6; optG.add(rim);
-  const flG = new THREE.ShapeGeometry(sh, 8); flG.rotateX(-Math.PI / 2); flG.scale(0.88, 1, 0.93);
-  const floorO = new THREE.Mesh(flG, mat('surface-100')); floorO.position.y = 0.62; optG.add(floorO);
-  const thwart = new THREE.Mesh(new THREE.BoxGeometry(2.3, 0.3, 0.14), mat('sun-300'));
-  thwart.position.set(0, 0.8, 0.55); optG.add(thwart);
-  const cs = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.7, 0.9), mat('sun-300'));
-  cs.position.set(0, 0.95, -0.05); optG.add(cs);
+  const inner = new THREE.Shape(sh.getPoints(14).map(q => new THREE.Vector2(q.x * sx, q.y * sy)));
+  const flG = new THREE.ShapeGeometry(inner, 8); flG.rotateX(-Math.PI / 2); flG.scale(0.8, 1, 1);
+  const floorO = new THREE.Mesh(flG, mat('surface-100')); floorO.position.y = -0.1; optG.add(floorO);
+  // flyteposer langs sidene, som på den ekte
+  for (const [x, z, len] of [[-0.92, -1.35, 1.3], [0.92, -1.35, 1.3], [-1.05, 1.75, 1.0], [1.05, 1.75, 1.0]]){
+    const tank = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.38, len), mat('surface-200', {}, 'ocean-100'));
+    tank.position.set(x, 0.1, z); optG.add(tank);
+  }
+  // hikkestropper på gulvet
+  for (const x of [-0.45, 0.45]){
+    const strap = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.03, 1.9), mat('ink', {}, 'surface-100'));
+    strap.position.set(x, -0.06, 1.1); optG.add(strap);
+  }
+  const thwart = new THREE.Mesh(new THREE.BoxGeometry(2.3, 0.28, 0.14), mat('sun-300'));
+  thwart.position.set(0, 0.3, 0.55); optG.add(thwart);
+  const cs = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.6, 0.9), mat('sun-300'));
+  cs.position.set(0, 0.2, -0.05); optG.add(cs);
   const rud = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.9, 0.5), inkMat);
   rud.position.set(0, 0.15, 2.7); optG.add(rud);
   const till = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.07, 1.0), inkMat);
