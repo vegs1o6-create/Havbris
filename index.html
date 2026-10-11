@@ -50,18 +50,21 @@
     --shadow-sm:0 1px 2px rgba(22,48,63,0.08);
     --shadow-md:0 4px 12px rgba(22,48,63,0.12);
     --shadow-lift:0 8px 24px rgba(22,48,63,0.16);
+    --glass:rgba(234,246,251,0.50); --glass-btn:rgba(255,255,255,0.45); --glass-line:rgba(255,255,255,0.55);
     color-scheme: light;
   }
   /* Kveld */
   @media (prefers-color-scheme: dark){
     :root:not([data-theme="light"]){
       --surface-100:#0d1b24; --surface-200:#14262f; --surface-300:#1b3340; --surface-400:#2b4a59;
+      --glass:rgba(13,27,36,0.50); --glass-btn:rgba(255,255,255,0.10); --glass-line:rgba(255,255,255,0.14);
       --ink:#eaf3f8; --ink-muted:#9fc0cf; --ink-faint:#5c7f8f; --focus-ring:#9ed4ec; --value:var(--sun-500); --ui-accent:var(--ocean-300); --ui-hot:var(--coral-500);
       color-scheme: dark;
     }
   }
   :root[data-theme="dark"]{
     --surface-100:#0d1b24; --surface-200:#14262f; --surface-300:#1b3340; --surface-400:#2b4a59;
+    --glass:rgba(13,27,36,0.50); --glass-btn:rgba(255,255,255,0.10); --glass-line:rgba(255,255,255,0.14);
     --ink:#eaf3f8; --ink-muted:#9fc0cf; --ink-faint:#5c7f8f; --focus-ring:#9ed4ec; --value:var(--sun-500); --ui-accent:var(--ocean-300); --ui-hot:var(--coral-500);
     color-scheme: dark;
   }
@@ -125,7 +128,7 @@
   .hud .spacer{ flex:1; }
 
   .stage{
-    position:relative; flex:1; min-height:280px;
+    position:relative; flex:1; min-height:clamp(520px, 74dvh, 880px); --ctl-h:190px;
     border-radius:var(--radius-lg);
     overflow:hidden;
     background:var(--surface-200);
@@ -163,13 +166,13 @@
   .pointer svg{ width:20px; height:20px; }
 
   .toast{
-    position:absolute; left:50%; bottom:var(--space-4); transform:translateX(-50%);
+    position:absolute; left:50%; bottom:calc(var(--ctl-h) + var(--space-3)); transform:translateX(-50%);
     pointer-events:none;
   }
 
   /* Kort / modal */
   .overlay{
-    position:absolute; inset:0;
+    position:absolute; inset:0; z-index:20;
     display:grid; place-items:center;
     padding:var(--space-4);
     background:rgba(13,27,36,0.2);
@@ -201,7 +204,7 @@
 
   /* Fartsmåler — stor skive nede til venstre */
   .speedo{
-    position:absolute; left:var(--space-4); bottom:var(--space-4);
+    position:absolute; left:var(--space-4); bottom:calc(var(--ctl-h) + var(--space-3));
     width:92px; padding:var(--space-1) var(--space-2);
     background:var(--surface-300); color:var(--ink);
     border-radius:var(--radius-lg); box-shadow:var(--shadow-md);
@@ -274,8 +277,8 @@
 
   /* Værkart — vindfelt, byger og tidslinje */
   .wxmap{
-    position:absolute; right:var(--space-4); bottom:var(--space-4);
-    width:372px; max-width:calc(100% - 2 * var(--space-4));
+    position:absolute; right:var(--space-4); bottom:calc(var(--ctl-h) + var(--space-3));
+    width:372px; max-height:calc(100% - var(--ctl-h) - 2 * var(--space-4)); overflow:auto; max-width:calc(100% - 2 * var(--space-4));
     padding:var(--space-3);
     background:var(--surface-300); color:var(--ink);
     border-radius:var(--radius-lg); box-shadow:var(--shadow-md);
@@ -307,14 +310,24 @@
 
   /* Kontroller */
   .controls{
-    display:grid; grid-template-columns:1fr auto 1fr; gap:var(--space-3);
-    margin-top:var(--space-3);
+    position:absolute; z-index:5; left:var(--space-3); right:var(--space-3); bottom:var(--space-3);
+    display:grid; grid-template-columns:1fr auto 1fr; gap:var(--space-2); align-items:end;
   }
   .panel{
-    background:var(--surface-200);
+    background:var(--glass);
+    -webkit-backdrop-filter:blur(8px) saturate(1.2); backdrop-filter:blur(8px) saturate(1.2);
+    box-shadow:inset 0 0 0 1px var(--glass-line);
     border-radius:var(--radius-lg);
-    padding:var(--space-3) var(--space-4);
+    padding:var(--space-2) var(--space-3);
   }
+  .controls .hb-button--ghost{ background:var(--glass-btn); box-shadow:inset 0 0 0 1px var(--glass-line); }
+  .controls .hb-button--ghost:hover{ background:var(--glass-btn); }
+  .controls .hb-button--ghost.active{ background:var(--ocean-500); color:var(--on-ocean-tint); }
+  .panel[data-sail] .panel-btns{ grid-template-columns:1.5fr 1.5fr 1fr 1fr; }
+  .panel[data-sail] .panel-btns .hb-button{ padding:var(--space-2) 0; min-height:44px; font-size:14px; }
+  .panel[data-sail] [data-status]{ font-size:12px; padding:0 var(--space-2); }
+  .panel[data-sail] .panel-btns .long{ display:none; }
+  .helm .panel-head{ display:none; }
   .panel-head{ display:flex; align-items:center; justify-content:space-between; gap:var(--space-2); margin-bottom:var(--space-2); }
   .panel-name{ font-family:var(--font-heading); font-size:19px; line-height:26px; font-weight:600; }
   .panel-keys{ font-size:12px; line-height:16px; font-weight:500; color:var(--ink-muted); }
@@ -323,7 +336,7 @@
   .panel-meta{ font-size:14px; line-height:20px; color:var(--ink-muted); margin-bottom:var(--space-2); }
   .panel-btns{ display:grid; grid-template-columns:1fr 1fr; gap:var(--space-2); }
   .panel-btns .hb-button{ min-height:44px; padding:var(--space-2) var(--space-3); }
-  .helm{ display:flex; flex-direction:column; justify-content:center; gap:var(--space-2); min-width:220px; }
+  .helm{ display:flex; flex-direction:column; justify-content:center; gap:var(--space-2); min-width:260px; }
   .helm .panel-btns .hb-button{ min-height:64px; }
 
   @media (max-width:720px){
@@ -331,7 +344,9 @@
     header{ flex-wrap:wrap; gap:var(--space-2); }
     .header-actions{ margin-left:auto; }
     .header-actions .hb-button--sm{ padding:var(--space-2) var(--space-3); }
-    .controls{ grid-template-columns:repeat(2, minmax(0, 1fr)); gap:var(--space-2); }
+    .controls{ grid-template-columns:repeat(2, minmax(0, 1fr)); gap:var(--space-2); left:var(--space-2); right:var(--space-2); bottom:var(--space-2); }
+    .panel[data-sail] .meter, .panel[data-sail] .panel-meta{ display:none; }
+    .panel[data-sail] .panel-head{ margin-bottom:var(--space-1); }
     .panel-head{ flex-wrap:wrap; row-gap:var(--space-1); }
     .panel-name{ font-size:17px; }
     .helm{ grid-column:1 / -1; order:3; min-width:0; }
@@ -342,7 +357,7 @@
     .trim{ top:var(--space-3); right:var(--space-3); padding:var(--space-2); gap:var(--space-2); }
     .trim svg{ width:72px; height:72px; }
     .trim .sub{ display:none; }
-    .speedo{ width:76px; left:var(--space-3); bottom:var(--space-3); padding:var(--space-1) var(--space-1); }
+    .speedo{ width:76px; left:var(--space-3); bottom:calc(var(--ctl-h) + var(--space-2)); padding:var(--space-1) var(--space-1); }
     .wxmap{ right:var(--space-3); top:var(--space-3); bottom:auto; width:calc(100% - 2 * var(--space-3)); max-width:372px; padding:var(--space-2); }
     .wx-body{ grid-template-columns:112px minmax(0, 1fr); gap:var(--space-2); }
     .wx-stack{ width:112px; height:112px; }
@@ -454,6 +469,54 @@
 
   <div class="pointer" id="pointer" hidden>
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg>
+  </div>
+
+  <div class="controls" id="controls">
+    <section class="panel" data-sail="main">
+      <div class="panel-head">
+        <span class="panel-name" id="mainName">Storseil</span>
+        <span class="hb-badge hb-badge--info" data-status>Nede</span>
+      </div>
+      <div class="meter"><span data-meter></span></div>
+      <div class="panel-meta" data-meta>Nede · midt</div>
+      <div class="panel-btns">
+        <button class="hb-button hb-button--ghost" data-act="up">Opp</button>
+        <button class="hb-button hb-button--ghost" data-act="down">Ned</button>
+        <button class="hb-button hb-button--ghost" data-act="port" aria-label="Storseil mot babord">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg><span class="long">Babord</span></button>
+        <button class="hb-button hb-button--ghost" data-act="stbd" aria-label="Storseil mot styrbord"><span class="long">Styrbord</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
+      </div>
+    </section>
+
+    <section class="panel helm" aria-label="Ror">
+      <div class="panel-head">
+        <span class="panel-name">Ror</span>
+      </div>
+      <div class="panel-btns">
+        <button class="hb-button hb-button--ghost" id="leftBtn" aria-label="Styr babord">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>Babord</button>
+        <button class="hb-button hb-button--ghost" id="rightBtn" aria-label="Styr styrbord">Styrbord
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
+      </div>
+    </section>
+
+    <section class="panel" data-sail="jib">
+      <div class="panel-head">
+        <span class="panel-name">Forseil</span>
+        <span class="hb-badge hb-badge--info" data-status>Nede</span>
+      </div>
+      <div class="meter"><span data-meter></span></div>
+      <div class="panel-meta" data-meta>Nede · midt</div>
+      <div class="panel-btns">
+        <button class="hb-button hb-button--ghost" data-act="up">Opp</button>
+        <button class="hb-button hb-button--ghost" data-act="down">Ned</button>
+        <button class="hb-button hb-button--ghost" data-act="port" aria-label="Forseil mot babord">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg><span class="long">Babord</span></button>
+        <button class="hb-button hb-button--ghost" data-act="stbd" aria-label="Forseil mot styrbord"><span class="long">Styrbord</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
+      </div>
+    </section>
   </div>
 
   <div class="overlay" id="startOverlay">
@@ -586,54 +649,6 @@
       <p class="hb-card__body">3D-motoren kunne ikke hentes. Sjekk nettforbindelsen og last siden på nytt.</p>
     </div>
   </div>
-</div>
-
-<div class="controls">
-  <section class="panel" data-sail="main">
-    <div class="panel-head">
-      <span class="panel-name" id="mainName">Storseil</span>
-      <span class="hb-badge hb-badge--info" data-status>Nede</span>
-    </div>
-    <div class="meter"><span data-meter></span></div>
-    <div class="panel-meta" data-meta>Nede · midt</div>
-    <div class="panel-btns">
-      <button class="hb-button hb-button--ghost" data-act="up">Opp</button>
-      <button class="hb-button hb-button--ghost" data-act="down">Ned</button>
-      <button class="hb-button hb-button--ghost" data-act="port" aria-label="Storseil mot babord">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg><span class="long">Babord</span></button>
-      <button class="hb-button hb-button--ghost" data-act="stbd" aria-label="Storseil mot styrbord"><span class="long">Styrbord</span>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
-    </div>
-  </section>
-
-  <section class="panel helm">
-    <div class="panel-head">
-      <span class="panel-name">Ror</span>
-    </div>
-    <div class="panel-btns">
-      <button class="hb-button hb-button--ghost" id="leftBtn" aria-label="Styr babord">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>Babord</button>
-      <button class="hb-button hb-button--ghost" id="rightBtn" aria-label="Styr styrbord">Styrbord
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
-    </div>
-  </section>
-
-  <section class="panel" data-sail="jib">
-    <div class="panel-head">
-      <span class="panel-name">Forseil</span>
-      <span class="hb-badge hb-badge--info" data-status>Nede</span>
-    </div>
-    <div class="meter"><span data-meter></span></div>
-    <div class="panel-meta" data-meta>Nede · midt</div>
-    <div class="panel-btns">
-      <button class="hb-button hb-button--ghost" data-act="up">Opp</button>
-      <button class="hb-button hb-button--ghost" data-act="down">Ned</button>
-      <button class="hb-button hb-button--ghost" data-act="port" aria-label="Forseil mot babord">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg><span class="long">Babord</span></button>
-      <button class="hb-button hb-button--ghost" data-act="stbd" aria-label="Forseil mot styrbord"><span class="long">Styrbord</span>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
-    </div>
-  </section>
 </div>
 
 <section class="trimbox" id="trimPanel" aria-label="Seiltrim for storseilet">
@@ -1872,10 +1887,12 @@ function nearNext(){
   const c = buoys[state.leg];
   return Math.hypot(c.x - state.x, c.z - state.z) < NEXT_RANGE;
 }
+let uiBottom = 0;
 function placePointer(el, tgt, W, H, show, markOnScreen){
   projV.set(tgt.x, 3, tgt.z).project(camera);
   const sx = (projV.x * 0.5 + 0.5) * W, sy = (-projV.y * 0.5 + 0.5) * H;
   const behind = projV.z > 1, m = 34;
+  H = H - uiBottom;                                  // kontrollene dekker nederste del
   const onScreen = !behind && sx > m && sx < W - m && sy > m && sy < H - m;
   if (!show || (onScreen && !markOnScreen)){ el.hidden = true; return; }
   el.hidden = false;
@@ -2082,9 +2099,18 @@ function resize(){
   renderer.setSize(W, H, false);
   camera.aspect = W / Math.max(H, 1);
   camera.fov = W < 560 ? 62 : 55;
+  // skyv bildet opp, så båten havner midt i det som ikke dekkes av kontrollene
+  const sh = Math.round(Math.min(uiBottom, H * 0.5) / 2);
+  if (sh > 0) camera.setViewOffset(W, H, 0, sh, W, H); else camera.clearViewOffset();
   camera.updateProjectionMatrix();
 }
 new ResizeObserver(resize).observe(stage);
+new ResizeObserver(() => {
+  const c = $('controls'); if (!c) return;
+  uiBottom = c.offsetHeight + 8;
+  stage.style.setProperty('--ctl-h', uiBottom + 'px');
+  resize();
+}).observe($('controls'));
 
 
 // ---------------------------------------------------------------------------
