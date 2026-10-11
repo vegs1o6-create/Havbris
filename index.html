@@ -243,6 +243,15 @@
   .lbform__msg{ font-size:13px; line-height:18px; color:var(--ink-muted); min-height:0; }
   .lbform__msg:empty{ display:none; }
 
+  .learn{ text-align:left; }
+  .learn details{ border-top:1px solid var(--surface-400); padding:var(--space-2) 0; }
+  .learn summary{ cursor:pointer; min-height:36px; display:flex; align-items:center; font-weight:700; font-size:15px; }
+  .learn details > :not(summary){ font-size:14px; line-height:20px; color:var(--ink-muted); }
+  .learn p{ margin:0 0 var(--space-2); }
+  .learn ul{ margin:0 0 var(--space-2); padding-left:var(--space-5); }
+  .learn li{ margin-bottom:var(--space-2); }
+  #learnOverlay{ position:fixed; z-index:50; background:rgba(13,27,36,0.45); }
+  #learnOverlay .hb-card{ max-height:calc(100dvh - 32px); overflow:auto; align-self:center; }
   /* Seiltrim */
   .trimbox{ margin-top:var(--space-3); padding:var(--space-3) var(--space-4); background:var(--surface-200); border-radius:var(--radius-lg); }
   .trimbox[hidden]{ display:none; }
@@ -486,7 +495,55 @@
           <button type="button" role="radio" class="seg__btn" data-wind="rolig">Rolig</button><button type="button" role="radio" class="seg__btn" data-wind="middels">Middels</button><button type="button" role="radio" class="seg__btn" data-wind="kraftig">Kraftig</button></div></div>
       <div class="hb-card__actions">
         <button class="hb-button hb-button--primary" id="resumeBtn">Seil videre</button>
+        <button class="hb-button hb-button--ghost" id="learnBtn">Lær</button>
         <button class="hb-button hb-button--ghost" id="restartBtn">Start på nytt</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="learnOverlay" hidden>
+    <div class="hb-card learn" role="dialog" aria-labelledby="learnTitle">
+      <div class="hb-card__eyebrow">Lær</div>
+      <h2 class="hb-card__title" id="learnTitle">Slik seiler du</h2>
+      <details open><summary>Å seile</summary>
+        <ul>
+          <li>Pila i vindboksen viser hvor vinden kommer fra. Du kan ikke seile rett mot den. Ligger du for nær, blafrer seilet og farten dør.</li>
+          <li>Seil på skrå mot vinden (skarpt) for å komme deg mot vinden. Med vinden fra siden eller bakfra får du mest fart.</li>
+          <li><b>Babord</b> svinger til venstre og <b>Styrbord</b> til høyre.</li>
+          <li>Skal vinden over på den andre siden, snur du gjennom vinden. Seilet bytter side, og farten faller en stund.</li>
+          <li>Krenger båten for mye, blir du overseilt. Fir ut seilet eller seil lenger fra vinden.</li>
+        </ul>
+      </details>
+      <details><summary>Å føre seilene</summary>
+        <ul>
+          <li>Trykk <b>Opp</b> for å heise seilet før du starter. Uten heist seil står du stille.</li>
+          <li>Pilene til venstre og høyre stiller seilet inn. Blafrer det, trekk det innover. Krenger båten for mye eller går sakte, fir det ut.</li>
+          <li>Skarpt mot vind trekkes seilene hardt inn, på halvvind står de halvveis ute, og på lens helt ute.</li>
+          <li>Kjølbåten har storseil og forseil. Optimisten har ett seil og ett panel.</li>
+        </ul>
+      </details>
+      <details><summary>Seiltrim (kjølbåten)</summary>
+        <ul>
+          <li><b>Twist:</b> Toppen av storseilet åpner seg og slipper ut kraft og krengning. I lite vind taper du litt fart på mye twist (3,0 mot 3,4 knop ved 5 m/s). I 15 m/s skarpt mot vind er det motsatt. Uten twist krenger båten 29° og blir overseilt, mens med full twist er det 19° og båten går 9,0 mot 7,9 knop.</li>
+          <li><b>Kicker:</b> Viktigst når seilet er firt, på slør og lens. Med slakk kicker løfter bommen seg og toppen av seilet blafrer, og du mister opptil 5–7 % fart og noe kontroll. Skarpt mot vind spiller den liten rolle.</li>
+          <li><b>Akterstag:</b> Masta bøyer seg forover og forstaget strammes, så seilene blir flatere. I mye vind gir det mindre krengning og bedre høyde. Skarpt mot vind i 15 m/s gikk båten 5,8 mot 4,9 knop. I lite vind og på slør taper du fart, for eksempel 4,1 mot 5,1 knop ved 5 m/s på halvvind, så akterstaget bør være slakt der.</li>
+        </ul>
+      </details>
+      <details><summary>Bøyer og mål</summary>
+        <ul>
+          <li>Rund alle fire bøyene i rekkefølge og seil i havn. Tiden går mens du seiler.</li>
+          <li>Når du er innenfor 75 m fra bøya du runder, dukker det opp en lilla pil mot neste bøye. Neste bøye får lilla ring, og merket øverst viser avstanden.</li>
+        </ul>
+      </details>
+      <details><summary>Ledertavle</summary>
+        <ul>
+          <li>De 5 beste tidene vises på startkortet og etter målgang, med båt og vind for hver tid.</li>
+          <li>Kommer tiden din inn på listen, skriver du navnet ditt og trykker Lagre. Tidene deles med alle som spiller via lenken.</li>
+          <li>Tider med ulik båt og vind kan ikke sammenlignes direkte. Les båt og vind ved siden av tiden.</li>
+        </ul>
+      </details>
+      <div class="hb-card__actions" style="margin-top:var(--space-3)">
+        <button class="hb-button hb-button--primary" id="learnBack">Tilbake</button>
       </div>
     </div>
   </div>
@@ -2260,7 +2317,7 @@ function start(){
   state.running = true;
   state.runInfo = { boat: boatKey, wind: windLevel };
   lbSeq++; lbStartAt = 0;
-  $('startOverlay').hidden = true; $('finishOverlay').hidden = true; $('pauseOverlay').hidden = true;
+  $('startOverlay').hidden = true; $('finishOverlay').hidden = true; $('pauseOverlay').hidden = true; $('learnOverlay').hidden = true;
   update(0.001);
 }
 // ---------------------------------------------------------------------------
@@ -2396,12 +2453,15 @@ function setPaused(p){
   if (!state.running) return;
   state.paused = p;
   $('pauseOverlay').hidden = !p;
+  if (!p) $('learnOverlay').hidden = true;
   if (p) $('resumeBtn').focus();
 }
 $('startBtn').addEventListener('click', start);
 $('againBtn').addEventListener('click', start);
 $('restartBtn').addEventListener('click', start);
 $('resumeBtn').addEventListener('click', () => setPaused(false));
+$('learnBtn').addEventListener('click', () => { $('learnOverlay').hidden = false; $('learnBack').focus(); });
+$('learnBack').addEventListener('click', () => { $('learnOverlay').hidden = true; $('learnBtn').focus(); });
 $('pauseBtn').addEventListener('click', () => setPaused(!state.paused));
 
 // tastatur
