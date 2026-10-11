@@ -309,7 +309,7 @@
 </head>
 <body>
 <script type="importmap">
-  { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js" } }
+  { "imports": { "three": "./vendor/three.module.js" } }
 </script>
 <div class="wrap" style="display:flex; flex-direction:column; flex:1;">
 
@@ -528,6 +528,7 @@
 <script type="module">
 import * as THREE from 'three';
 window.__havbrisReady = true;
+if ('serviceWorker' in navigator) addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
 document.getElementById('errorOverlay').hidden = true;
 
 const TAU = Math.PI * 2, DEG = Math.PI / 180;
