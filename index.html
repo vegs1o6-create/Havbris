@@ -986,10 +986,10 @@ function buildSail(s, luff0, luff1, footLen, topFrac, delta, camber, flap, t){
 
 const BOATS = {
   kjol: { name: 'Kjølbåt', sails: 2, group: cruiserG, pivot: boomPivot, bag: sailBag, mastZ: MAST_Z, boomY: BOOM_Y, luff: MAST_H, boomLen: BOOM_LEN,
-          topFrac: 0.93, areaM: 1.0, areaJ: 0.65, heelLimit: 380, heelMax: 22, maxSpeed: 11, drive: 1, turn: 1, cam: 1, lookY: 2.4, wakeBack: 4.2,
+          topFrac: 0.93, areaM: 1.0, areaJ: 0.65, heelLimit: 380, heelMax: 22, bobK: 0.8, lift: 0, maxSpeed: 11, drive: 1, turn: 1, cam: 1, lookY: 2.4, wakeBack: 4.2,
           trimHull: 'M0 -40 C10 -28 12 -4 9 30 L-9 30 C-12 -4 -10 -28 0 -40 Z' },
   opti: { name: 'Optimist', sails: 1, group: optG, pivot: optPivot, bag: optBag, mastZ: OPT.mastZ, boomY: OPT.boomY, luff: OPT.luff, boomLen: OPT.boomLen,
-          topFrac: 0.55, areaM: 0.9, areaJ: 0, heelLimit: 170, heelMax: 28, maxSpeed: 4.1, drive: 1, turn: 1.4, cam: 0.68, lookY: 1.7, wakeBack: 2.8,
+          topFrac: 0.55, areaM: 0.9, areaJ: 0, heelLimit: 170, heelMax: 28, bobK: 1, lift: 0.4, maxSpeed: 4.1, drive: 1, turn: 1.4, cam: 0.68, lookY: 1.7, wakeBack: 2.8,
           trimHull: 'M-10 -34 L10 -34 C14 -20 16 10 15 30 L-15 30 C-16 10 -14 -20 -10 -34 Z' },
 };
 let boatKey = 'kjol';
@@ -1660,7 +1660,7 @@ function render(dt){
   const pitch = (waveH(state.x + Fx * 4, state.z + Fz * 4, t) - waveH(state.x - Fx * 4, state.z - Fz * 4, t)) / 8;
   state.pitch = lerp(state.pitch, pitch, dt * 4);
   const shake = state.bump * Math.sin(t * 50) * 0.04;
-  boat.position.set(state.x, bob * 0.8 + 0.1, state.z);
+  boat.position.set(state.x, bob * B.bobK + 0.1 + B.lift, state.z);
   boat.rotation.y = -state.heading;
   tilt.rotation.set(state.pitch, 0, -state.heel + shake);
 
