@@ -34,6 +34,7 @@
     --on-ocean:#ffffff; --on-ocean-tint:#16303f;
     --sun-300:#ffe9a8; --sun-500:#f6c94a; --sun-700:#a5780b; --on-sun:#16303f;
     --meadow-300:#c9ecd1; --meadow-500:#6fbf8c; --meadow-700:#2f7d54; --on-meadow:#ffffff; --on-meadow-tint:#16303f;
+    --plum-300:#ddd5f5; --plum-500:#7a66cc; --on-plum:#ffffff; --on-plum-tint:#16303f;
     --coral-300:#fbd7c6; --coral-500:#f0906a; --coral-700:#b84d2e; --on-coral:#ffffff; --on-coral-tint:#16303f;
     --success:var(--meadow-700); --warning:var(--sun-500); --danger:var(--coral-700);
     --focus-ring:#1f6f9c;
@@ -153,6 +154,10 @@
     box-shadow:var(--shadow-md);
     pointer-events:none;
   }
+  .pointer.next{ background:var(--plum-500); color:var(--on-plum); box-shadow:0 0 0 4px var(--plum-300), var(--shadow-md); animation:nextpulse 1.1s ease-in-out infinite; }
+  @keyframes nextpulse{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.2); } }
+  @media (prefers-reduced-motion:reduce){ .pointer.next{ animation:none; } }
+  .hb-badge--next{ background:var(--plum-300); color:var(--on-plum-tint); }
   .pointer.home{ background:var(--meadow-700); color:var(--on-meadow); }
   .pointer[hidden]{ display:none; }
   .pointer svg{ width:20px; height:20px; }
@@ -214,6 +219,30 @@
   .windpick{ display:flex; flex-direction:column; gap:var(--space-1); margin:var(--space-3) 0; }
   .windpick__label{ font-size:12px; line-height:16px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-muted); }
   .seg{ display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:4px; padding:4px; background:var(--surface-300); border-radius:var(--radius-pill); box-shadow:inset 0 0 0 1px var(--surface-400); }
+  /* Ledertavle */
+  .lbbox{ display:flex; flex-direction:column; gap:var(--space-2); margin:var(--space-3) 0; }
+  .lbbox__title, .lbdetails summary{ font-size:12px; line-height:16px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-muted); }
+  .lbdetails{ margin:var(--space-3) 0; }
+  .lbdetails summary{ cursor:pointer; min-height:32px; display:flex; align-items:center; }
+  .lbdetails[open] summary{ margin-bottom:var(--space-2); }
+  .lb{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px; }
+  .lb li{ display:grid; grid-template-columns:28px minmax(0, 1fr) auto; column-gap:var(--space-2); align-items:baseline; padding:8px var(--space-3); background:var(--surface-100); border-radius:var(--radius-md); box-shadow:inset 0 0 0 1px var(--surface-400); }
+  .lb li.me{ background:var(--sun-300); color:var(--on-sun); box-shadow:inset 0 0 0 2px var(--sun-700); }
+  .lb__rank{ font-family:var(--font-heading); font-weight:700; font-size:17px; color:var(--ink-muted); }
+  .lb li.me .lb__rank{ color:var(--on-sun); }
+  .lb__name{ font-weight:700; font-size:15px; line-height:20px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .lb__time{ font-family:var(--font-heading); font-weight:700; font-size:17px; font-variant-numeric:tabular-nums; }
+  .lb__meta{ grid-column:2 / -1; font-size:12px; line-height:16px; color:var(--ink-muted); }
+  .lb li.me .lb__meta{ color:var(--on-sun); }
+  .lbnote{ font-size:12px; line-height:16px; color:var(--ink-muted); margin:0; }
+  .lbform{ display:flex; flex-direction:column; gap:var(--space-1); }
+  .lbform label{ font-size:14px; line-height:20px; font-weight:700; }
+  .lbform__row{ display:flex; gap:var(--space-2); flex-wrap:wrap; }
+  .lbform input{ flex:1 1 150px; min-width:0; min-height:44px; padding:0 var(--space-3); font:inherit; font-size:16px; color:var(--ink); background:var(--surface-100); border:0; border-radius:var(--radius-pill); box-shadow:inset 0 0 0 2px var(--surface-400); }
+  .lbform input:focus-visible{ outline:3px solid var(--ui-accent); outline-offset:2px; }
+  .lbform__msg{ font-size:13px; line-height:18px; color:var(--ink-muted); min-height:0; }
+  .lbform__msg:empty{ display:none; }
+
   /* Seiltrim */
   .trimbox{ margin-top:var(--space-3); padding:var(--space-3) var(--space-4); background:var(--surface-200); border-radius:var(--radius-lg); }
   .trimbox[hidden]{ display:none; }
@@ -320,6 +349,7 @@
 </style>
 </head>
 <body>
+<script src="config.js"></script>
 <script type="importmap">
   { "imports": { "three": "./vendor/three.module.js" } }
 </script>
@@ -342,6 +372,7 @@
 <div class="hud" aria-live="polite">
   <span class="hb-badge hb-badge--info" id="targetBadge">Bøye 1 av 4</span>
   <span class="hb-badge hb-badge--info" id="distBadge">0 m</span>
+  <span class="hb-badge hb-badge--next" id="nextBadge" hidden>Neste</span>
   <span class="hb-badge hb-badge--warning" id="hoistBadge" hidden>Heis seilene</span>
   <span class="hb-badge hb-badge--danger" id="squallBadge" hidden>
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 15a4 4 0 1 1 1-7.9A5 5 0 0 1 17.5 9 3.5 3.5 0 0 1 17 16H7"/><path d="M9 19l-1 2M13 19l-1 2"/></svg>
@@ -408,6 +439,10 @@
     <div class="wx-legend"><span>3</span><span class="wx-ramp" id="wxRamp"></span><span>22+ m/s</span></div>
   </aside>
 
+  <div class="pointer next" id="pointerNext" hidden aria-hidden="true">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg>
+  </div>
+
   <div class="pointer" id="pointer" hidden>
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg>
   </div>
@@ -430,6 +465,10 @@
           <button type="button" role="radio" class="seg__btn" data-boat="kjol">Kjølbåt</button><button type="button" role="radio" class="seg__btn" data-boat="opti">Optimist</button></div></div>
       <div class="windpick"><div class="windpick__label" id="wp1">Vind</div><div class="seg" role="radiogroup" aria-labelledby="wp1">
           <button type="button" role="radio" class="seg__btn" data-wind="rolig">Rolig</button><button type="button" role="radio" class="seg__btn" data-wind="middels">Middels</button><button type="button" role="radio" class="seg__btn" data-wind="kraftig">Kraftig</button></div></div>
+      <details class="lbdetails" id="lbStartDetails">
+        <summary>Ledertavle · topp 5</summary>
+        <div id="lbStart" class="lbbox__list"></div>
+      </details>
       <div class="hb-card__actions">
         <button class="hb-button hb-button--primary hb-button--lg" id="startBtn">Sett seil</button>
       </div>
@@ -461,6 +500,18 @@
         <span class="hb-badge hb-badge--success" id="bestTime" hidden>Ny beste tid</span>
       </div>
       <p class="hb-card__body" id="finishText">Du kom trygt i havn.</p>
+      <div class="lbbox" id="lbBox">
+        <div class="lbbox__title">Ledertavle · topp 5</div>
+        <form class="lbform" id="lbForm" hidden>
+          <label for="lbName">Du kom inn på topp 5! Skriv inn navnet ditt</label>
+          <div class="lbform__row">
+            <input id="lbName" type="text" maxlength="16" autocomplete="nickname" autocapitalize="words" placeholder="Navnet ditt" required>
+            <button class="hb-button hb-button--primary" id="lbSave" type="submit">Lagre tid</button>
+          </div>
+        </form>
+        <div class="lbform__msg" id="lbMsg" role="status"></div>
+        <div id="lbFinish" class="lbbox__list"></div>
+      </div>
       <div class="windpick"><div class="windpick__label" id="bp3">Båt</div><div class="seg seg--2" role="radiogroup" aria-labelledby="bp3">
           <button type="button" role="radio" class="seg__btn" data-boat="kjol">Kjølbåt</button><button type="button" role="radio" class="seg__btn" data-boat="opti">Optimist</button></div></div>
       <div class="windpick"><div class="windpick__label" id="wp3">Vind</div><div class="seg" role="radiogroup" aria-labelledby="wp3">
@@ -590,7 +641,7 @@ function readColors(){
   const cs = getComputedStyle(root);
   for (const n of ['surface-100','surface-200','surface-300','surface-400','ink','ink-muted',
     'ocean-100','ocean-300','ocean-500','ocean-700','on-ocean','sun-300','sun-500','sun-700',
-    'meadow-300','meadow-500','meadow-700','coral-300','coral-500','coral-700','ui-accent','ui-hot'])
+    'meadow-300','meadow-500','meadow-700','coral-300','coral-500','coral-700','plum-300','plum-500','ui-accent','ui-hot'])
     colors[n] = cs.getPropertyValue('--' + n).trim();
   $('themeBtn').textContent = isDark() ? 'Dag' : 'Kveld';
 }
@@ -1079,6 +1130,7 @@ const BOATS = {
 };
 let boatKey = 'kjol';
 try { const b = localStorage.getItem('havbris-boat'); if (BOATS[b]) boatKey = b; } catch (e) {}
+let pickBoat = boatKey;      // valget i menyen; boatKey er båten som faktisk seiler
 let B = BOATS[boatKey];
 function applyBoat(){
   B = BOATS[boatKey];
@@ -1111,6 +1163,7 @@ const WIND_LEVELS = {
 };
 let windLevel = 'middels';
 try { const w = localStorage.getItem('havbris-wind'); if (WIND_LEVELS[w]) windLevel = w; } catch (e) {}
+let pickWind = windLevel;
 const WS = { dir0: 0, base: 9, ph: [0, 0, 0, 0, 0, 0], band: [0, 0], period: 900 };
 const SQ = [ { x0: 0, z0: 0, vx: 0, vz: 0, r: 50 }, { x0: 0, z0: 0, vx: 0, vz: 0, r: 50 } ];
 const FORECAST = 300;                       // sekunder fram i tid
@@ -1163,6 +1216,7 @@ const state = {
 
 function reset(){
   const r = Math.random;
+  windLevel = pickWind; boatKey = pickBoat;      // valgene låses når seilasen starter
   applyBoat();
   Object.assign(state, { running: false, paused: false, finished: false, t: 0, leg: 0, speed: 0, heel: 0, over: false, bump: 0 });
   // nytt vær hver gang: vindretning, faser, kastbånd og to byger på faste baner
@@ -1435,6 +1489,11 @@ function updateHud(){
   tb.textContent = state.leg < buoys.length ? `Bøye ${state.leg + 1} av ${buoys.length}` : 'Seil i havn';
   tb.className = 'hb-badge ' + (state.leg < buoys.length ? 'hb-badge--info' : 'hb-badge--success');
   $('distBadge').textContent = `${Math.round(Math.hypot(tgt.x - state.x, tgt.z - state.z))} m`;
+  const nb = $('nextBadge'), up = upcomingTarget();
+  nb.hidden = !(up && nearNext());
+  if (!nb.hidden) nb.textContent = state.leg < buoys.length - 1
+    ? `Neste: bøye ${state.leg + 2} · ${Math.round(Math.hypot(up.x - state.x, up.z - state.z))} m`
+    : `Neste: havna · ${Math.round(Math.hypot(up.x - state.x, up.z - state.z))} m`;
   $('squallBadge').hidden = !nearSquall;
   $('overBadge').hidden = !state.over;
   $('hoistBadge').hidden = state.main.hoist + state.jib.hoist > 0.3;
@@ -1742,26 +1801,57 @@ $('wxStack').addEventListener('pointerdown', e => {
   wx.dirty = true;
 });
 
-// pil mot neste mål
-const pointer = $('pointer');
+// pil mot gjeldende mål, og en ny pil i annen farge mot målet etter det når man er nær nok
+const NEXT_RANGE = 75;
+const pointer = $('pointer'), pointerNext = $('pointerNext');
 const projV = new THREE.Vector3();
-function updatePointer(W, H){
-  const tgt = currentTarget();
+function upcomingTarget(){
+  if (state.leg < buoys.length - 1) return buoys[state.leg + 1];
+  if (state.leg === buoys.length - 1) return harbor;
+  return null;
+}
+function nearNext(){
+  if (!state.running || state.leg >= buoys.length) return false;
+  const c = buoys[state.leg];
+  return Math.hypot(c.x - state.x, c.z - state.z) < NEXT_RANGE;
+}
+function placePointer(el, tgt, W, H, show, markOnScreen){
   projV.set(tgt.x, 3, tgt.z).project(camera);
-  let sx = (projV.x * 0.5 + 0.5) * W, sy = (-projV.y * 0.5 + 0.5) * H;
-  const behind = projV.z > 1;
-  const m = 34;
+  const sx = (projV.x * 0.5 + 0.5) * W, sy = (-projV.y * 0.5 + 0.5) * H;
+  const behind = projV.z > 1, m = 34;
   const onScreen = !behind && sx > m && sx < W - m && sy > m && sy < H - m;
-  pointer.hidden = onScreen || !state.running;
-  pointer.classList.toggle('home', state.leg >= buoys.length);
-  if (onScreen) return;
+  if (!show || (onScreen && !markOnScreen)){ el.hidden = true; return; }
+  el.hidden = false;
+  if (onScreen){                                   // på skjermen: pil som peker ned mot bøyen
+    el.style.left = sx + 'px';
+    el.style.top = Math.max(m, sy - 64) + 'px';
+    el.firstElementChild.style.transform = 'rotate(90deg)';
+    return;
+  }
   let dx = sx - W / 2, dy = sy - H / 2;
   if (behind){ dx = -dx; dy = Math.abs(dy) + H; }
   const a = Math.atan2(dy, dx);
   const k = Math.min((W / 2 - m) / Math.abs(Math.cos(a) || 1e-6), (H / 2 - m) / Math.abs(Math.sin(a) || 1e-6));
-  pointer.style.left = (W / 2 + Math.cos(a) * k) + 'px';
-  pointer.style.top = (H / 2 + Math.sin(a) * k) + 'px';
-  pointer.firstElementChild.style.transform = `rotate(${a}rad)`;
+  el.style.left = (W / 2 + Math.cos(a) * k) + 'px';
+  el.style.top = (H / 2 + Math.sin(a) * k) + 'px';
+  el.firstElementChild.style.transform = `rotate(${a}rad)`;
+}
+function updatePointer(W, H){
+  const tgt = currentTarget();
+  pointer.classList.toggle('home', state.leg >= buoys.length);
+  placePointer(pointer, tgt, W, H, state.running, false);
+  const up = upcomingTarget();
+  placePointer(pointerNext, up || tgt, W, H, !!up && nearNext(), true);
+  // unngå at de to pilene ligger oppå hverandre ved kanten
+  if (!pointer.hidden && !pointerNext.hidden){
+    const ax = parseFloat(pointer.style.left), ay = parseFloat(pointer.style.top);
+    const bx = parseFloat(pointerNext.style.left), by = parseFloat(pointerNext.style.top);
+    if (Math.hypot(ax - bx, ay - by) < 46){
+      const ang = Math.atan2(by - H / 2, bx - W / 2) + Math.PI / 2;
+      pointerNext.style.left = (bx + Math.cos(ang) * 48) + 'px';
+      pointerNext.style.top = (by + Math.sin(ang) * 48) + 'px';
+    }
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -1840,22 +1930,27 @@ function render(dt){
   optVane.rotation.y = -(flowAng) + Math.PI;
 
   // bøyer
+  const nearN = nearNext();
   buoyObjs.forEach((b, i) => {
     const done = i < state.leg, next = i === state.leg;
-    b.m.color.set(done ? colors['meadow-500'] : colors['sun-500']);
+    const nextUp = i === state.leg + 1 && nearN;           // bøyen etter denne: ny farge og kraftigere markering
+    b.m.color.set(done ? colors['meadow-500'] : nextUp ? colors['plum-500'] : colors['sun-500']);
     b.g.position.y = waveH(buoys[i].x, buoys[i].z, t) * 0.8;
     b.g.rotation.z = Math.sin(t * 1.3 + i) * 0.06;
-    b.ring.visible = next && state.running;
-    if (next){
-      const p = (t * 0.7) % 1;
-      b.ring.scale.setScalar(2 + p * 10);
-      b.ring.material.color.set(colors['sun-500']);
+    b.ring.visible = (next || nextUp) && state.running;
+    if (next || nextUp){
+      const p = (t * (nextUp ? 1.0 : 0.7)) % 1;
+      b.ring.scale.setScalar((nextUp ? 3 : 2) + p * (nextUp ? 14 : 10));
+      b.ring.material.color.set(nextUp ? colors['plum-500'] : colors['sun-500']);
       b.ring.material.opacity = 1 - p;
     }
+    b.g.scale.setScalar(nextUp ? 1.3 + Math.sin(t * 5) * 0.06 : 1);
+    b.label.scale.setScalar(nextUp ? 4.6 : 3.2);
     b.label.visible = !done;
   });
-  homeRingMat.color.set(state.leg >= buoys.length ? colors['meadow-700'] : colors['surface-400']);
-  homeRing.scale.setScalar(1 + (state.leg >= buoys.length ? Math.sin(t * 3) * 0.05 : 0));
+  const homeNext = nearN && state.leg === buoys.length - 1;
+  homeRingMat.color.set(state.leg >= buoys.length ? colors['meadow-700'] : homeNext ? colors['plum-500'] : colors['surface-400']);
+  homeRing.scale.setScalar(1 + (state.leg >= buoys.length ? Math.sin(t * 3) * 0.05 : homeNext ? Math.sin(t * 5) * 0.08 : 0));
 
   // byger
   for (const s of squallObjs){
@@ -2095,7 +2190,7 @@ const sound = (() => {
   addEventListener(ev, sound.resume, { passive: true, capture: true }));
 document.addEventListener('visibilitychange', () => { if (!document.hidden) sound.resume(); });
 $('soundBtn').addEventListener('click', sound.toggle);
-addEventListener('keydown', e => { if (e.code === 'KeyM') sound.toggle(); });
+addEventListener('keydown', e => { if (e.code === 'KeyM' && !(e.target && e.target.tagName === 'INPUT')) sound.toggle(); });
 
 // ---------------------------------------------------------------------------
 // Valg av vindstyrke — gjelder fra neste start
@@ -2108,27 +2203,28 @@ function pickOn(attr, cur){
   });
 }
 function renderPicks(){
-  pickOn('wind', windLevel); pickOn('boat', boatKey);
+  pickOn('wind', pickWind); pickOn('boat', pickBoat);
   const t = document.querySelector('#startOverlay .hb-card__title');
-  if (t) t.textContent = WIND_LEVELS[windLevel].title;
+  if (t) t.textContent = WIND_LEVELS[pickWind].title;
 }
 function setWindLevel(k){
   if (!WIND_LEVELS[k]) return;
-  windLevel = k;
+  pickWind = k;
+  if (!state.running) windLevel = k;
   try { localStorage.setItem('havbris-wind', k); } catch (e) {}
   renderPicks();
 }
 function setBoat(k){
   if (!BOATS[k]) return;
-  boatKey = k;
+  pickBoat = k;
   try { localStorage.setItem('havbris-boat', k); } catch (e) {}
-  applyBoat();
+  if (!state.running){ boatKey = k; applyBoat(); }
   renderPicks();
 }
 document.querySelectorAll('.seg').forEach(g => {
   const attr = g.querySelector('[data-boat]') ? 'boat' : 'wind';
   const keys = Object.keys(attr === 'boat' ? BOATS : WIND_LEVELS);
-  const cur = () => attr === 'boat' ? boatKey : windLevel;
+  const cur = () => attr === 'boat' ? pickBoat : pickWind;
   const set = k => attr === 'boat' ? setBoat(k) : setWindLevel(k);
   g.addEventListener('click', e => { const b = e.target.closest('.seg__btn'); if (b) set(b.dataset[attr]); });
   g.addEventListener('keydown', e => {
@@ -2162,9 +2258,124 @@ function start(){
   sound.resume();
   reset();
   state.running = true;
+  state.runInfo = { boat: boatKey, wind: windLevel };
+  lbSeq++; lbStartAt = 0;
   $('startOverlay').hidden = true; $('finishOverlay').hidden = true; $('pauseOverlay').hidden = true;
   update(0.001);
 }
+// ---------------------------------------------------------------------------
+// Ledertavle — felles for alle via en liten Firebase-database (se LEDERTAVLE.md).
+// Uten oppsett i config.js lagres tidene bare på denne enheten.
+// ---------------------------------------------------------------------------
+const LB_URL = String((window.HAVBRIS_CONFIG && window.HAVBRIS_CONFIG.leaderboardURL) || '').trim().replace(/\/+$/, '');
+const LB_N = 5;
+const lbLocalKey = 'havbris-lb-local';
+const fmtMs = ms => { const t = ms / 1000, m = Math.floor(t / 60); return `${m}:${(t - m * 60).toFixed(1).padStart(4, '0')}`; };
+const lbValid = r => r && typeof r.name === 'string' && typeof r.time === 'number' && BOATS[r.boat] && WIND_LEVELS[r.wind];
+const lbClean = n => String(n || '').replace(/[\u0000-\u001f\u007f<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, 16);
+
+function lbLocalGet(){
+  try { const a = JSON.parse(localStorage.getItem(lbLocalKey) || '[]'); return Array.isArray(a) ? a.filter(lbValid) : []; } catch (e) { return []; }
+}
+function lbLocalAdd(e){
+  const a = lbLocalGet(); a.push(e); a.sort((x, y) => x.time - y.time);
+  try { localStorage.setItem(lbLocalKey, JSON.stringify(a.slice(0, LB_N))); } catch (err) {}
+}
+async function lbFetch(){
+  if (!LB_URL) return { rows: lbLocalGet(), local: true };
+  const ctl = new AbortController(), to = setTimeout(() => ctl.abort(), 8000);
+  try {
+    const r = await fetch(`${LB_URL}/scores.json?orderBy=%22time%22&limitToFirst=${LB_N}`, { signal: ctl.signal, cache: 'no-store' });
+    if (!r.ok) throw new Error('http ' + r.status);
+    const d = (await r.json()) || {};
+    const rows = Object.entries(d).map(([id, v]) => ({ id, ...v })).filter(lbValid).sort((x, y) => x.time - y.time).slice(0, LB_N);
+    return { rows, local: false };
+  } catch (e) {
+    return { rows: lbLocalGet(), local: true, failed: true };
+  } finally { clearTimeout(to); }
+}
+async function lbSubmit(entry){
+  if (!LB_URL){ lbLocalAdd(entry); return { id: null, local: true }; }
+  const r = await fetch(`${LB_URL}/scores.json`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name: entry.name, time: entry.time, boat: entry.boat, wind: entry.wind, ts: { '.sv': 'timestamp' } }),
+  });
+  if (!r.ok) throw new Error('http ' + r.status);
+  const d = await r.json();
+  return { id: d && d.name, local: false };
+}
+function renderBoard(el, res, hiId){
+  el.replaceChildren();
+  if (!res.rows.length){
+    const p = document.createElement('p'); p.className = 'lbnote'; p.textContent = 'Ingen tider ennå. Bli den første!'; el.append(p);
+  } else {
+    const ol = document.createElement('ol'); ol.className = 'lb';
+    res.rows.forEach((r, i) => {
+      const li = document.createElement('li');
+      if (hiId && r.id === hiId) li.className = 'me';
+      const mk = (cls, txt) => { const s = document.createElement('span'); s.className = cls; s.textContent = txt; return s; };
+      li.append(mk('lb__rank', String(i + 1)), mk('lb__name', r.name), mk('lb__time', fmtMs(r.time)),
+                mk('lb__meta', `${BOATS[r.boat].name} · ${WIND_LEVELS[r.wind].label} vind`));
+      ol.append(li);
+    });
+    el.append(ol);
+  }
+  const note = document.createElement('p'); note.className = 'lbnote';
+  if (res.failed) note.textContent = 'Fikk ikke kontakt med ledertavlen. Viser tider lagret på denne enheten.';
+  else if (res.local) note.textContent = 'Ledertavlen er ikke koblet til nett ennå. Tidene lagres bare på denne enheten.';
+  if (note.textContent) el.append(note);
+}
+let lbSeq = 0, lbPending = null;
+async function lbShowFinish(ms, info){
+  const seq = ++lbSeq;
+  const form = $('lbForm'), msg = $('lbMsg'), box = $('lbFinish');
+  form.hidden = true; msg.textContent = ''; lbPending = null;
+  box.textContent = 'Henter ledertavlen …';
+  const res = await lbFetch();
+  if (seq !== lbSeq || !state.finished) return;
+  renderBoard(box, res);
+  const qualifies = res.rows.length < LB_N || ms < res.rows[res.rows.length - 1].time;
+  if (qualifies){
+    lbPending = { time: ms, boat: info.boat, wind: info.wind };
+    form.hidden = false;
+    $('lbSave').disabled = false;
+    $('lbName').focus();
+  } else {
+    msg.textContent = `Ikke inn på topp ${LB_N} denne gangen (${fmtMs(ms)}). Nummer ${LB_N} har ${fmtMs(res.rows[res.rows.length - 1].time)}.`;
+  }
+}
+$('lbForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  if (!lbPending) return;
+  const name = lbClean($('lbName').value);
+  if (!name){ $('lbMsg').textContent = 'Skriv inn et navn først.'; $('lbName').focus(); return; }
+  const entry = { ...lbPending, name };
+  const seq = lbSeq;
+  $('lbSave').disabled = true; $('lbMsg').textContent = 'Lagrer …';
+  try {
+    const out = await lbSubmit(entry);
+    try { localStorage.setItem('havbris-name', name); } catch (err) {}
+    if (seq !== lbSeq) return;
+    lbPending = null; $('lbForm').hidden = true; $('lbMsg').textContent = 'Tiden er lagret.';
+    const res = await lbFetch();
+    if (res.local && !res.failed && !LB_URL) out.id = null;
+    // lokal liste har ingen id; marker raden som samsvarer med tiden vi nettopp la inn
+    if (res.local) { const hit = res.rows.find(r => r.time === entry.time && r.name === entry.name); if (hit) hit.id = out.id = 'local'; }
+    renderBoard($('lbFinish'), res, out.id);
+  } catch (err) {
+    $('lbSave').disabled = false;
+    $('lbMsg').textContent = 'Fikk ikke lagret tiden. Sjekk nettforbindelsen og prøv igjen.';
+  }
+});
+try { const n = localStorage.getItem('havbris-name'); if (n) $('lbName').value = lbClean(n); } catch (e) {}
+let lbStartAt = 0;
+$('lbStartDetails').addEventListener('toggle', async () => {
+  if (!$('lbStartDetails').open || Date.now() - lbStartAt < 10000) return;
+  const box = $('lbStart'); box.textContent = 'Henter ledertavlen …';
+  const res = await lbFetch(); lbStartAt = Date.now();
+  renderBoard(box, res);
+});
+
 function finish(){
   state.running = false; state.finished = true;
   const t = state.t;
@@ -2174,11 +2385,12 @@ function finish(){
   const isBest = !best || t < best;
   if (isBest){ try { localStorage.setItem('havbris3d-best', String(t)); } catch (e) {} }
   $('bestTime').hidden = !isBest;
+  const info = state.runInfo || { boat: boatKey, wind: windLevel };
   $('finishText').textContent = isBest
-    ? 'Du rundet alle bøyene og kom trygt i havn. Det er din raskeste seilas så langt.'
+    ? `Du rundet alle bøyene og kom trygt i havn. Det er din raskeste seilas så langt. (${BOATS[info.boat].name}, ${WIND_LEVELS[info.wind].label.toLowerCase()} vind)`
     : `Du rundet alle bøyene og kom trygt i havn. Beste tid er ${fmtTime(best)}.`;
   $('finishOverlay').hidden = false;
-  $('againBtn').focus();
+  lbShowFinish(Math.round(t * 1000), info);
 }
 function setPaused(p){
   if (!state.running) return;
@@ -2202,6 +2414,7 @@ function setInput(path, v){ if (path.length === 1) input[path[0]] = v; else inpu
 addEventListener('keydown', e => {
   const inField = e.target && e.target.tagName === 'INPUT';
   if (!inField && keyMap[e.code]){ setInput(keyMap[e.code], true); e.preventDefault(); }
+  if (inField && e.code !== 'Escape') return;
   if (e.code === 'KeyP' || e.code === 'Escape') setPaused(!state.paused);
   if (e.code === 'KeyV' && !e.repeat) setWx(!wx.open);
 });
@@ -2247,7 +2460,7 @@ function frame(now){
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
-window.__havbris = { state, input, update, reset, sound, setBoat: k => setBoat(k), WIND_LEVELS };
+window.__havbris = { state, input, update, reset, sound, finish, buoys, setBoat: k => setBoat(k), WIND_LEVELS };
 </script>
 
 </body>

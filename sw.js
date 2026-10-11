@@ -1,9 +1,9 @@
 // Havbris – service worker: gjør spillet tilgjengelig uten nett.
 // Øk VERSION når filene endres, så hentes alt på nytt.
-const VERSION = 'havbris-v2';
+const VERSION = 'havbris-v3';
 const SHELL = [
   './',
-  'index.html',
+  'index.html','config.js',
   'manifest.webmanifest',
   'vendor/three.module.js',
   'icons/icon.svg',
