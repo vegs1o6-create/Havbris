@@ -290,7 +290,18 @@
     display:flex; flex-direction:column; gap:var(--space-2);
   }
   .wxmap[hidden]{ display:none; }
-  .wx-head{ display:flex; align-items:center; justify-content:space-between; gap:var(--space-2); }
+  .wx-head{ display:flex; align-items:center; gap:var(--space-2); }
+  .wx-head .wx-title{ margin-right:auto; }
+  .wx-size{ min-height:36px; padding:var(--space-1) var(--space-3); }
+  .wxmap{ --wxs:168px; }
+  .wxmap.big{ width:min(calc(100% - 2 * var(--space-4)), 860px); max-width:none; --wxs:clamp(240px, min(calc(100dvh - var(--ctl-h) - 250px), calc(100vw - 330px)), 600px); }
+  .wxmap.big .wx-body{ grid-template-columns:var(--wxs) minmax(0, 1fr); }
+  .wxmap.big .wx-stack{ width:var(--wxs); height:var(--wxs); }
+  .wxmap.big .wx-meteo{ display:block; }
+  .wxmap.big .wx-axis{ display:flex; }
+  .wxmap.big .wx-legend{ display:grid; }
+  .wxmap.big .wx-text{ font-size:15px; line-height:21px; }
+  @media (max-width:720px){ .wxmap.big{ width:calc(100% - 2 * var(--space-3)); max-height:calc(100% - var(--ctl-h) - 2 * var(--space-3)); --wxs:min(calc(100vw - 64px), calc(100dvh - var(--ctl-h) - 330px)); } .wxmap.big .wx-body{ grid-template-columns:1fr; justify-items:center; } .wxmap.big .wx-side{ width:100%; } }
   .wx-title{ font-family:var(--font-heading); font-size:19px; line-height:26px; font-weight:600; margin:0; }
   .wx-body{ display:grid; grid-template-columns:168px minmax(0, 1fr); gap:var(--space-3); }
   .wx-stack{
@@ -397,6 +408,7 @@
     .helm .panel-btns .hb-button{ min-height:52px; }
     .speedo{ left:max(var(--space-3), env(safe-area-inset-left)); }
     .wxmap{ top:calc(var(--space-2) + 60px); bottom:auto; max-height:calc(100% - var(--ctl-h) - 80px); }
+    .wxmap.big{ top:calc(var(--space-2) + 56px); right:50%; transform:translateX(50%); }
     .wx-open .trim{ display:none; }
   }
   @media (orientation:landscape) and (max-height:520px){ .trim, .speedo{ display:none; } }
@@ -412,6 +424,7 @@
 <header>
   <h1 class="brand">Havbris<small>Et rolig seilspill i myke farger.</small></h1>
   <div class="header-actions">
+    <button class="hb-button hb-button--ghost hb-button--sm" id="focusBtn" aria-pressed="false" title="Kameraet ser mot neste bøye">Se mål</button>
     <button class="hb-button hb-button--ghost hb-button--sm" id="wxBtn" aria-pressed="false" aria-controls="wxPanel">Vær</button>
     <button class="hb-button hb-button--ghost hb-button--sm" id="pauseBtn" aria-label="Pause">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M9 6v12M15 6v12"/></svg>
@@ -474,10 +487,11 @@
     <div class="wx-head">
       <h2 class="wx-title">Værkart</h2>
       <span class="hb-badge hb-badge--info" id="wxWhen">Nå</span>
+      <button class="hb-button hb-button--ghost hb-button--sm wx-size" id="wxBig" type="button" aria-pressed="false" aria-label="Forstørr kartet">Forstørr</button>
     </div>
     <div class="wx-body">
       <div class="wx-stack" id="wxStack">
-        <canvas id="wxBase" role="img" aria-label="Kart over vind og byger. Trykk på kartet for å lese vinden et sted."></canvas>
+        <canvas id="wxBase" role="img" aria-label="Kart over vind, byger og bøyene 1 til 4. Trykk for å forstørre, og trykk igjen for å lese vinden et sted."></canvas>
         <canvas id="wxFlow" aria-hidden="true"></canvas>
       </div>
       <div class="wx-side">
@@ -1744,12 +1758,29 @@ function drawWxBase(){
   ctx.fillStyle = INK_FIXED;
   ctx.fillRect(hx - 5, hz - 4, 10, 8);
   ctx.beginPath(); ctx.moveTo(hx - 7, hz - 4); ctx.lineTo(hx, hz - 10); ctx.lineTo(hx + 7, hz - 4); ctx.closePath(); ctx.fill();
+  // rute: havn → 1 → 2 → 3 → 4 → havn, og linje fra båten til neste mål
+  ctx.save();
+  ctx.setLineDash([4, 4]); ctx.lineWidth = 1.2; ctx.strokeStyle = 'rgba(22,48,63,.5)';
+  ctx.beginPath(); ctx.moveTo(hx, hz);
+  buoys.forEach(b => ctx.lineTo(b.x * k, b.z * k)); ctx.lineTo(hx, hz); ctx.stroke();
+  const tg = currentTarget();
+  ctx.setLineDash([]); ctx.lineWidth = 2; ctx.strokeStyle = colors['plum-500'];
+  ctx.beginPath(); ctx.moveTo(state.x * k, state.z * k); ctx.lineTo(tg.x * k, tg.z * k); ctx.stroke();
+  ctx.restore();
+  ctx.fillStyle = INK_FIXED; ctx.font = `700 ${Math.round(9 * Math.min(sc, 1.5))}px Nunito, system-ui, sans-serif`;
+  ctx.fillText('Havn', hx, hz + 15 * Math.min(sc, 1.5));
+  // bøyer som nummererte sirkler
+  const br = 8 * Math.min(sc, 1.6);
   buoys.forEach((b, i) => {
     const done = i < state.leg, next = i === state.leg;
-    ctx.beginPath(); ctx.arc(b.x * k, b.z * k, next ? 4.5 : 3.5, 0, TAU);
-    ctx.fillStyle = done ? colors['meadow-700'] : colors['sun-300']; ctx.fill();
-    ctx.lineWidth = next ? 2 : 1.2; ctx.strokeStyle = INK_FIXED; ctx.stroke();
-    ctx.fillStyle = INK_FIXED; ctx.fillText(String(i + 1), b.x * k + 8, b.z * k - 5);
+    const bx = b.x * k, bz = b.z * k;
+    if (next){ ctx.beginPath(); ctx.arc(bx, bz, br + 4, 0, TAU); ctx.fillStyle = colors['plum-300']; ctx.fill(); }
+    ctx.beginPath(); ctx.arc(bx, bz, br, 0, TAU);
+    ctx.fillStyle = next ? colors['plum-500'] : done ? colors['meadow-700'] : colors['sun-300']; ctx.fill();
+    ctx.lineWidth = next ? 2.2 : 1.4; ctx.strokeStyle = INK_FIXED; ctx.stroke();
+    ctx.font = `800 ${Math.round(br * 1.35)}px Nunito, system-ui, sans-serif`;
+    ctx.fillStyle = (next || done) ? '#ffffff' : INK_FIXED;
+    ctx.fillText(String(i + 1), bx, bz + 0.5);
   });
 
   // båten
@@ -1832,6 +1863,8 @@ function updateWxText(){
   const pt = wx.probe || { x: state.x, z: state.z };
   const here = windAt(pt.x, pt.z, tf);
   const rows = [];
+  { const tg = currentTarget(), dd = Math.round(Math.hypot(tg.x - state.x, tg.z - state.z));
+    rows.push(`<div><b>Neste: ${state.leg < buoys.length ? 'bøye ' + (state.leg + 1) : 'havna'}</b><br>${dd} m unna</div>`); }
   rows.push(`<div><b>${wx.probe ? 'Valgt punkt' : 'Ved båten'}${wx.off ? ' om ' + fmtTime(wx.off) : ''}</b><br>${Math.round(here.spd)} m/s fra ${compass(here.dir)}</div>`);
 
   // første byge som treffer deg dersom du blir liggende
@@ -1877,19 +1910,38 @@ function setWx(open){
   $('wxBtn').classList.toggle('active', open);
   stage.classList.toggle('wx-open', open);
   try { localStorage.setItem('havbris-wx', open ? 'on' : 'off'); } catch (e) {}
+  if (!open && wx.big) setWxBig(false);
   if (open){ wxResize(); wx.dirty = true; }
 }
 $('wxBtn').addEventListener('click', () => setWx(!wx.open));
 new ResizeObserver(wxResize).observe($('wxPanel'));
 $('wxSlider').addEventListener('input', e => { wx.off = +e.target.value; wx.dirty = true; });
 $('wxNow').addEventListener('click', () => { wx.off = 0; wx.probe = null; $('wxSlider').value = 0; wx.dirty = true; });
+function setWxBig(b){
+  wx.big = b;
+  $('wxPanel').classList.toggle('big', b);
+  $('wxBig').setAttribute('aria-pressed', String(b));
+  $('wxBig').textContent = b ? 'Forminsk' : 'Forstørr';
+  $('wxBig').setAttribute('aria-label', b ? 'Gjør kartet mindre' : 'Forstørr kartet');
+  requestAnimationFrame(() => { wxResize(); wx.dirty = true; });
+}
+$('wxBig').addEventListener('click', () => setWxBig(!wx.big));
 $('wxStack').addEventListener('pointerdown', e => {
+  if (!wx.big){ setWxBig(true); return; }              // første trykk forstørrer, deretter leser du vind
   const r = e.currentTarget.getBoundingClientRect();
   const x = (e.clientX - r.left) / r.width * WORLD, z = (e.clientY - r.top) / r.height * WORLD;
   wx.probe = (wx.probe && Math.hypot(wx.probe.x - x, wx.probe.z - z) < 40) ? null : { x, z };
   wx.dirty = true;
 });
 
+let focusMode = false;
+function setFocus(on){
+  focusMode = on;
+  $('focusBtn').setAttribute('aria-pressed', String(on));
+  $('focusBtn').classList.toggle('active', on);
+  $('focusBtn').textContent = on ? 'Se båt' : 'Se mål';
+}
+$('focusBtn').addEventListener('click', () => setFocus(!focusMode));
 // pil mot gjeldende mål, og en ny pil i annen farge mot målet etter det når man er nær nok
 const NEXT_RANGE = 75;
 const pointer = $('pointer'), pointerNext = $('pointerNext');
@@ -2097,9 +2149,15 @@ function render(dt){
   // kameraet glir litt ut mot le, så begge seilene synes
   const leeSide = Math.abs(state.main.angle) > 5 * DEG ? Math.sign(state.main.angle) : 0;
   camSide = lerp(camSide, leeSide * (narrow ? 3.5 : 4.5) * B.cam, 1 - Math.exp(-dt * 0.8));
-  const Sx = Math.cos(state.heading), Sz = Math.sin(state.heading);
-  const desired = new THREE.Vector3(state.x - Fx * back + Sx * camSide, up + bob * 0.3, state.z - Fz * back + Sz * camSide);
-  const look = new THREE.Vector3(state.x + Fx * 10, 2.4, state.z + Fz * 10);
+  let Sx = Math.cos(state.heading), Sz = Math.sin(state.heading), cfx = Fx, cfz = Fz, cback = back, cup = up, cdist = 10;
+  if (focusMode){                                    // kameraet ser mot neste mål i stedet for langs båten
+    const tg = currentTarget();
+    let dx = tg.x - state.x, dz = tg.z - state.z; const dd = Math.hypot(dx, dz) || 1;
+    cfx = dx / dd; cfz = dz / dd; Sx = 0; Sz = 0;
+    cback = back * 1.15; cup = up * 1.5; cdist = Math.min(dd, 70);
+  }
+  const desired = new THREE.Vector3(state.x - cfx * cback + Sx * camSide, cup + bob * 0.3, state.z - cfz * cback + Sz * camSide);
+  const look = new THREE.Vector3(state.x + cfx * cdist, 2.4, state.z + cfz * cdist);
   look.y = B.lookY;
   if (!camInit){ camPos.copy(desired); camLook.copy(look); camInit = true; }
   const k = 1 - Math.exp(-dt * 2.5);
@@ -2363,6 +2421,7 @@ syncTrimUI();
 function start(){
   sound.resume();
   reset();
+  setFocus(false);
   state.running = true;
   state.runInfo = { boat: boatKey, wind: windLevel };
   lbSeq++; lbStartAt = 0;
