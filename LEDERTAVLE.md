@@ -12,6 +12,9 @@ Uten oppsett her lagres ledertavlen bare på den enheten som spiller. For at all
    ```
 6. Commit og push til `main`. Spillet henter og lagrer da tider mot databasen.
 
+## Regatta har egen ledertavle
+Regatta-modusen lagrer i en egen gren, `regatta`, så tidene ikke blandes med «Rund bøyene». Reglene i `firebase-rules.json` dekker begge grenene. Har du allerede lagt inn reglene fra før, må du lime inn hele filen på nytt (fanen **Rules → Publish**). Ellers avvises regattatidene, og spillet viser «Fikk ikke lagret tiden». Tiden regnes fra startskuddet til mål, inkludert eventuell straff, og må være minst 2 minutter.
+
 ## Begrensninger
 - Koden ligger åpent i nettleseren, så hvem som helst kan sende falske tider. Reglene begrenser kun format og verdiområde (20 s – 60 min), og at eksisterende rader ikke kan endres eller slettes.
 - Sletting av uønskede rader gjøres i Firebase-konsollen (Data-fanen).

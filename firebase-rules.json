@@ -3,16 +3,61 @@
     ".read": false,
     "scores": {
       ".read": true,
-      ".indexOn": ["time"],
+      ".indexOn": [
+        "time"
+      ],
       "$id": {
         ".write": "!data.exists() && newData.exists()",
         ".validate": "newData.hasChildren(['name','time','boat','wind','ts'])",
-        "name": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 16" },
-        "time": { ".validate": "newData.isNumber() && newData.val() >= 20000 && newData.val() <= 3600000" },
-        "boat": { ".validate": "newData.val() === 'kjol' || newData.val() === 'opti'" },
-        "wind": { ".validate": "newData.val() === 'rolig' || newData.val() === 'middels' || newData.val() === 'kraftig'" },
-        "ts":   { ".validate": "newData.isNumber() && newData.val() <= now + 60000" },
-        "$other": { ".validate": false }
+        "name": {
+          ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 16"
+        },
+        "time": {
+          ".validate": "newData.isNumber() && newData.val() >= 20000 && newData.val() <= 3600000"
+        },
+        "boat": {
+          ".validate": "newData.val() === 'kjol' || newData.val() === 'opti'"
+        },
+        "wind": {
+          ".validate": "newData.val() === 'rolig' || newData.val() === 'middels' || newData.val() === 'kraftig'"
+        },
+        "ts": {
+          ".validate": "newData.isNumber() && newData.val() <= now + 60000"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+    "regatta": {
+      ".read": true,
+      ".indexOn": [
+        "time"
+      ],
+      "$id": {
+        ".write": "!data.exists() && newData.exists()",
+        ".validate": "newData.hasChildren(['name','time','boat','wind','ts'])",
+        "name": {
+          ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 16"
+        },
+        "time": {
+          ".validate": "newData.isNumber() && newData.val() >= 120000 && newData.val() <= 3600000"
+        },
+        "boat": {
+          ".validate": "newData.val() === 'kjol'"
+        },
+        "wind": {
+          ".validate": "newData.val() === 'rolig' || newData.val() === 'middels' || newData.val() === 'kraftig'"
+        },
+        "ts": {
+          ".validate": "newData.isNumber() && newData.val() <= now + 60000"
+        },
+        "place": {
+          ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 3"
+        },
+        "$other": {
+          ".validate": false
+        }
       }
     }
   }
