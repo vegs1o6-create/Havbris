@@ -425,7 +425,7 @@
   <h1 class="brand">Havbris<small>Et rolig seilspill i myke farger.</small></h1>
   <div class="header-actions">
     <button class="hb-button hb-button--ghost hb-button--sm" id="focusBtn" aria-pressed="false" title="Kameraet ser mot neste bøye">Se mål</button>
-    <button class="hb-button hb-button--ghost hb-button--sm" id="wxBtn" aria-pressed="false" aria-controls="wxPanel">Vær</button>
+    <button class="hb-button hb-button--ghost hb-button--sm" id="wxBtn" aria-pressed="false" aria-controls="wxPanel">Kart</button>
     <button class="hb-button hb-button--ghost hb-button--sm" id="pauseBtn" aria-label="Pause">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M9 6v12M15 6v12"/></svg>
     </button>
@@ -483,15 +483,14 @@
     </svg>
   </div>
 
-  <aside class="wxmap" id="wxPanel" aria-label="Værkart" hidden>
+  <aside class="wxmap big" id="wxPanel" aria-label="Værkart" hidden>
     <div class="wx-head">
       <h2 class="wx-title">Værkart</h2>
       <span class="hb-badge hb-badge--info" id="wxWhen">Nå</span>
-      <button class="hb-button hb-button--ghost hb-button--sm wx-size" id="wxBig" type="button" aria-pressed="false" aria-label="Forstørr kartet">Forstørr</button>
     </div>
     <div class="wx-body">
       <div class="wx-stack" id="wxStack">
-        <canvas id="wxBase" role="img" aria-label="Kart over vind, byger og bøyene 1 til 4. Trykk for å forstørre, og trykk igjen for å lese vinden et sted."></canvas>
+        <canvas id="wxBase" role="img" aria-label="Kart over vind, byger, øyer og bøyene 1 til 4. Trykk for å lese vinden et sted."></canvas>
         <canvas id="wxFlow" aria-hidden="true"></canvas>
       </div>
       <div class="wx-side">
@@ -583,7 +582,7 @@
           <li>Velg båt og vind under, og trykk <b>Sett seil</b>.</li>
           <li><b>Opp</b> heiser seilet. Pilene stiller det inn. Blafrer det, trekk det litt innover.</li>
           <li><b>Babord</b> og <b>Styrbord</b> nederst styrer båten.</li>
-          <li><b>Vær</b> viser vind og byger framover.</li>
+          <li><b>Kart</b> viser vind, byger, øyene og bøyene 1–4.</li>
           <li>Kjølbåten har seiltrim under: <b>Twist</b>, <b>Kicker</b> og <b>Akterstag</b>.</li>
         </ul>
       </div>
@@ -1712,15 +1711,27 @@ function drawWxBase(){
   ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
   ctx.drawImage(heat, 0, 0, S, S);
 
-  // øyer
-  ctx.lineWidth = 1;
-  for (const is of islands){
-    ctx.beginPath(); ctx.arc(is.x * k, is.z * k, is.r * k, 0, TAU);
+  // øyer: små uregelmessige holmer med sandkant
+  const blob = (cx, cz, r, seed) => {
+    const n = 14;
+    ctx.beginPath();
+    for (let j = 0; j <= n; j++){
+      const a = j / n * TAU;
+      const rr = r * (0.82 + 0.14 * Math.sin(a * 2 + seed) + 0.09 * Math.sin(a * 3 + seed * 1.7) + 0.05 * Math.sin(a * 5 + seed * 2.9));
+      const x = cx + Math.cos(a) * rr * 1.08, z = cz + Math.sin(a) * rr * 0.92;
+      j ? ctx.lineTo(x, z) : ctx.moveTo(x, z);
+    }
+    ctx.closePath();
+  };
+  ctx.lineWidth = 1; ctx.lineJoin = 'round';
+  islands.forEach((is, i) => {
+    const seed = i * 2.17 + 0.6;
+    blob(is.x * k, is.z * k, is.r * k, seed);
     ctx.fillStyle = colors['sun-300']; ctx.fill();
     ctx.strokeStyle = 'rgba(22,48,63,.45)'; ctx.stroke();
-    ctx.beginPath(); ctx.arc(is.x * k, is.z * k, is.r * k * 0.74, 0, TAU);
+    blob(is.x * k + 0.6, is.z * k - 0.4, is.r * k * 0.7, seed + 1.3);
     ctx.fillStyle = colors['meadow-500']; ctx.fill();
-  }
+  });
 
   // vindpiler
   ctx.beginPath();
@@ -1758,13 +1769,10 @@ function drawWxBase(){
   ctx.fillStyle = INK_FIXED;
   ctx.fillRect(hx - 5, hz - 4, 10, 8);
   ctx.beginPath(); ctx.moveTo(hx - 7, hz - 4); ctx.lineTo(hx, hz - 10); ctx.lineTo(hx + 7, hz - 4); ctx.closePath(); ctx.fill();
-  // rute: havn → 1 → 2 → 3 → 4 → havn, og linje fra båten til neste mål
+  // linje fra båten til neste mål
   ctx.save();
-  ctx.setLineDash([4, 4]); ctx.lineWidth = 1.2; ctx.strokeStyle = 'rgba(22,48,63,.5)';
-  ctx.beginPath(); ctx.moveTo(hx, hz);
-  buoys.forEach(b => ctx.lineTo(b.x * k, b.z * k)); ctx.lineTo(hx, hz); ctx.stroke();
   const tg = currentTarget();
-  ctx.setLineDash([]); ctx.lineWidth = 2; ctx.strokeStyle = colors['plum-500'];
+  ctx.lineWidth = 2; ctx.strokeStyle = colors['plum-500'];
   ctx.beginPath(); ctx.moveTo(state.x * k, state.z * k); ctx.lineTo(tg.x * k, tg.z * k); ctx.stroke();
   ctx.restore();
   ctx.fillStyle = INK_FIXED; ctx.font = `700 ${Math.round(9 * Math.min(sc, 1.5))}px Nunito, system-ui, sans-serif`;
@@ -1910,7 +1918,6 @@ function setWx(open){
   $('wxBtn').classList.toggle('active', open);
   stage.classList.toggle('wx-open', open);
   try { localStorage.setItem('havbris-wx', open ? 'on' : 'off'); } catch (e) {}
-  if (!open && wx.big) setWxBig(false);
   if (open){ wxResize(); wx.dirty = true; }
 }
 $('wxBtn').addEventListener('click', () => setWx(!wx.open));
@@ -1920,14 +1927,9 @@ $('wxNow').addEventListener('click', () => { wx.off = 0; wx.probe = null; $('wxS
 function setWxBig(b){
   wx.big = b;
   $('wxPanel').classList.toggle('big', b);
-  $('wxBig').setAttribute('aria-pressed', String(b));
-  $('wxBig').textContent = b ? 'Forminsk' : 'Forstørr';
-  $('wxBig').setAttribute('aria-label', b ? 'Gjør kartet mindre' : 'Forstørr kartet');
   requestAnimationFrame(() => { wxResize(); wx.dirty = true; });
 }
-$('wxBig').addEventListener('click', () => setWxBig(!wx.big));
 $('wxStack').addEventListener('pointerdown', e => {
-  if (!wx.big){ setWxBig(true); return; }              // første trykk forstørrer, deretter leser du vind
   const r = e.currentTarget.getBoundingClientRect();
   const x = (e.clientX - r.left) / r.width * WORLD, z = (e.clientY - r.top) / r.height * WORLD;
   wx.probe = (wx.probe && Math.hypot(wx.probe.x - x, wx.probe.z - z) < 40) ? null : { x, z };
@@ -2609,7 +2611,7 @@ document.querySelectorAll('[data-sail]').forEach(p => {
 reset();
 applyTheme();
 resize();
-let wxStart = false;                     // kartet åpnes med Vær-knappen; husker siste valg
+let wxStart = false;                     // kartet åpnes med Kart-knappen; husker siste valg
 try { const v = localStorage.getItem('havbris-wx'); if (v) wxStart = v === 'on'; } catch (e) {}
 setWx(wxStart);
 let last = performance.now();
