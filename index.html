@@ -253,8 +253,18 @@
   .learn p{ margin:0 0 var(--space-2); }
   .learn ul{ margin:0 0 var(--space-2); padding-left:var(--space-5); }
   .learn li{ margin-bottom:var(--space-2); }
-  #learnOverlay{ position:fixed; z-index:50; background:rgba(13,27,36,0.45); }
-  #learnOverlay .hb-card{ max-height:calc(100dvh - 32px); overflow:auto; align-self:center; }
+  #menuOverlay{ position:fixed; z-index:50; background:rgba(13,27,36,0.45); }
+  #menuOverlay .hb-card{ max-height:calc(100dvh - 32px); overflow:auto; align-self:center; max-width:560px; }
+  .seg--3{ grid-template-columns:repeat(3, minmax(0, 1fr)); }
+  .menutabs{ margin:var(--space-2) 0 var(--space-3); }
+  .menupane[hidden]{ display:none; }
+  .menunote{ margin:0 0 var(--space-2); font-size:14px; color:var(--ink-muted); }
+  .menuh{ font-family:var(--font-heading); font-size:17px; line-height:24px; margin:var(--space-3) 0 var(--space-1); }
+  .keys{ display:grid; grid-template-columns:minmax(96px, auto) minmax(0, 1fr); gap:var(--space-2) var(--space-3); margin:0; font-size:14px; line-height:20px; align-items:baseline; }
+  .keys dt{ font-weight:700; color:var(--ink); }
+  .keys dd{ margin:0; color:var(--ink-muted); }
+  .keys kbd{ min-width:24px; display:inline-block; text-align:center; }
+  @media (max-width:420px){ .keys{ grid-template-columns:1fr; gap:0; } .keys dd{ margin-bottom:var(--space-2); } }
   /* Seiltrim */
   .trimrow{
     grid-column:1 / -1;
@@ -277,7 +287,7 @@
   @media (max-width:720px){ .controls.single .panel[data-sail]{ grid-column:1 / -1; } }
   .seg__btn{ font:inherit; font-weight:700; font-size:14px; line-height:20px; min-height:40px; padding:0 var(--space-2); border:0; border-radius:var(--radius-pill); background:transparent; color:var(--ink); cursor:pointer; transition:background .15s, color .15s; }
   .seg__btn:hover{ background:var(--surface-400); }
-  .seg__btn[aria-checked="true"]{ background:var(--ocean-700); color:var(--on-ocean); box-shadow:var(--shadow-sm); }
+  .seg__btn[aria-selected="true"], .seg__btn[aria-checked="true"]{ background:var(--ocean-700); color:var(--on-ocean); box-shadow:var(--shadow-sm); }
   .seg__btn:focus-visible{ outline:3px solid var(--ui-accent); outline-offset:2px; }
 
   /* Værkart — vindfelt, byger og tidslinje */
@@ -590,12 +600,9 @@
           <button type="button" role="radio" class="seg__btn" data-boat="kjol">Kjølbåt</button><button type="button" role="radio" class="seg__btn" data-boat="opti">Optimist</button></div></div>
       <div class="windpick"><div class="windpick__label" id="wp1">Vind</div><div class="seg" role="radiogroup" aria-labelledby="wp1">
           <button type="button" role="radio" class="seg__btn" data-wind="rolig">Rolig</button><button type="button" role="radio" class="seg__btn" data-wind="middels">Middels</button><button type="button" role="radio" class="seg__btn" data-wind="kraftig">Kraftig</button></div></div>
-      <details class="lbdetails" id="lbStartDetails">
-        <summary>Ledertavle · topp 5</summary>
-        <div id="lbStart" class="lbbox__list"></div>
-      </details>
       <div class="hb-card__actions">
         <button class="hb-button hb-button--primary hb-button--lg" id="startBtn">Sett seil</button>
+        <button class="hb-button hb-button--ghost hb-button--lg" id="menuBtnStart">Meny</button>
       </div>
     </div>
   </div>
@@ -611,17 +618,24 @@
           <button type="button" role="radio" class="seg__btn" data-wind="rolig">Rolig</button><button type="button" role="radio" class="seg__btn" data-wind="middels">Middels</button><button type="button" role="radio" class="seg__btn" data-wind="kraftig">Kraftig</button></div></div>
       <div class="hb-card__actions">
         <button class="hb-button hb-button--primary" id="resumeBtn">Seil videre</button>
-        <button class="hb-button hb-button--ghost" id="learnBtn">Lær</button>
+        <button class="hb-button hb-button--ghost" id="menuBtnPause">Meny</button>
         <button class="hb-button hb-button--ghost" id="restartBtn">Start på nytt</button>
       </div>
     </div>
   </div>
 
-  <div class="overlay" id="learnOverlay" hidden>
-    <div class="hb-card learn" role="dialog" aria-labelledby="learnTitle">
-      <div class="hb-card__eyebrow">Lær</div>
-      <h2 class="hb-card__title" id="learnTitle">Slik seiler du</h2>
-      <details open><summary>Å seile</summary>
+  <div class="overlay" id="menuOverlay" hidden>
+    <div class="hb-card learn" role="dialog" aria-modal="true" aria-labelledby="menuTitle">
+      <div class="hb-card__eyebrow">Meny</div>
+      <h2 class="hb-card__title" id="menuTitle">Havbris</h2>
+      <div class="seg seg--3 menutabs" role="tablist" aria-label="Meny">
+        <button type="button" role="tab" class="seg__btn" id="tabLaer" data-tab="laer" aria-selected="true" aria-controls="paneLaer">Lær</button>
+        <button type="button" role="tab" class="seg__btn" id="tabTavle" data-tab="tavle" aria-selected="false" aria-controls="paneTavle">Ledertavle</button>
+        <button type="button" role="tab" class="seg__btn" id="tabKontr" data-tab="kontr" aria-selected="false" aria-controls="paneKontr">Kontroller</button>
+      </div>
+
+      <div class="menupane" id="paneLaer" role="tabpanel" aria-labelledby="tabLaer">
+        <details open><summary>Å seile</summary>
         <ul>
           <li>Pila i vindboksen viser hvor vinden kommer fra. Du kan ikke seile rett mot den. Ligger du for nær, blafrer seilet og farten dør.</li>
           <li>Seil på skrå mot vinden (skarpt) for å komme deg mot vinden. Med vinden fra siden eller bakfra får du mest fart.</li>
@@ -658,8 +672,39 @@
           <li>Tider med ulik båt og vind kan ikke sammenlignes direkte. Les båt og vind ved siden av tiden.</li>
         </ul>
       </details>
+      </div>
+
+      <div class="menupane" id="paneTavle" role="tabpanel" aria-labelledby="tabTavle" hidden>
+        <p class="menunote">De 5 beste tidene, med båt og vind for hver tid.</p>
+        <div id="lbMenu" class="lbbox__list"></div>
+      </div>
+
+      <div class="menupane" id="paneKontr" role="tabpanel" aria-labelledby="tabKontr" hidden>
+        <h3 class="menuh">iPad og iPhone</h3>
+        <dl class="keys">
+          <dt>Ror</dt><dd>Hold <b>Babord</b> eller <b>Styrbord</b> nede nederst i midten.</dd>
+          <dt>Storseil og forseil</dt><dd><b>Opp</b> heiser og <b>Ned</b> fires. Pilene stiller seilet inn mot babord eller styrbord. Hold knappen nede.</dd>
+          <dt>Trim</dt><dd>Åpner skyvekontrollene Twist, Kicker og Akterstag (kun kjølbåten). Trykk igjen for å lukke.</dd>
+          <dt>Se mål</dt><dd>Kameraet vender mot neste bøye. Trykk <b>Se båt</b> for å gå tilbake.</dd>
+          <dt>Kart</dt><dd>Åpner kartet. Trykk i kartet for å lese vinden et sted, og dra i skyveknappen for å se været fram i tid.</dd>
+          <dt>Knappene øverst</dt><dd>Pause (II), lyd av og på, og Kveld for mørk visning.</dd>
+        </dl>
+        <h3 class="menuh">PC (tastatur)</h3>
+        <dl class="keys">
+          <dt><kbd>←</kbd> <kbd>→</kbd></dt><dd>Ror mot babord og styrbord</dd>
+          <dt><kbd>W</kbd> <kbd>S</kbd></dt><dd>Storseil opp og ned (heis)</dd>
+          <dt><kbd>A</kbd> <kbd>D</kbd></dt><dd>Storseil mot babord og styrbord</dd>
+          <dt><kbd>I</kbd> <kbd>K</kbd></dt><dd>Forseil opp og ned (heis)</dd>
+          <dt><kbd>J</kbd> <kbd>L</kbd></dt><dd>Forseil mot babord og styrbord</dd>
+          <dt><kbd>V</kbd></dt><dd>Åpne og lukke kartet</dd>
+          <dt><kbd>P</kbd> / <kbd>Esc</kbd></dt><dd>Pause. Esc lukker også menyen.</dd>
+          <dt><kbd>M</kbd></dt><dd>Lyd av og på</dd>
+        </dl>
+      </div>
+
       <div class="hb-card__actions" style="margin-top:var(--space-3)">
-        <button class="hb-button hb-button--primary" id="learnBack">Tilbake</button>
+        <button class="hb-button hb-button--primary" id="menuBack">Tilbake</button>
+        <button class="hb-button hb-button--ghost" id="menuRestart" hidden>Start på nytt</button>
       </div>
     </div>
   </div>
@@ -2436,8 +2481,8 @@ function start(){
   setFocus(false);
   state.running = true;
   state.runInfo = { boat: boatKey, wind: windLevel };
-  lbSeq++; lbStartAt = 0;
-  $('startOverlay').hidden = true; $('finishOverlay').hidden = true; $('pauseOverlay').hidden = true; $('learnOverlay').hidden = true;
+  lbSeq++; menuBoardAt = 0;
+  $('startOverlay').hidden = true; $('finishOverlay').hidden = true; $('pauseOverlay').hidden = true; $('menuOverlay').hidden = true;
   update(0.001);
 }
 // ---------------------------------------------------------------------------
@@ -2445,6 +2490,7 @@ function start(){
 // Uten oppsett i config.js lagres tidene bare på denne enheten.
 // ---------------------------------------------------------------------------
 const LB_URL = String((window.HAVBRIS_CONFIG && window.HAVBRIS_CONFIG.leaderboardURL) || '').trim().replace(/\/+$/, '');
+let menuBoardAt = 0;
 const LB_N = 5;
 const lbLocalKey = 'havbris-lb-local';
 const fmtMs = ms => { const t = ms / 1000, m = Math.floor(t / 60); return `${m}:${(t - m * 60).toFixed(1).padStart(4, '0')}`; };
@@ -2545,13 +2591,6 @@ $('lbForm').addEventListener('submit', async e => {
   }
 });
 try { const n = localStorage.getItem('havbris-name'); if (n) $('lbName').value = lbClean(n); } catch (e) {}
-let lbStartAt = 0;
-$('lbStartDetails').addEventListener('toggle', async () => {
-  if (!$('lbStartDetails').open || Date.now() - lbStartAt < 10000) return;
-  const box = $('lbStart'); box.textContent = 'Henter ledertavlen …';
-  const res = await lbFetch(); lbStartAt = Date.now();
-  renderBoard(box, res);
-});
 
 function finish(){
   state.running = false; state.finished = true;
@@ -2573,15 +2612,39 @@ function setPaused(p){
   if (!state.running) return;
   state.paused = p;
   $('pauseOverlay').hidden = !p;
-  if (!p) $('learnOverlay').hidden = true;
+  if (!p) $('menuOverlay').hidden = true;
   if (p) $('resumeBtn').focus();
 }
 $('startBtn').addEventListener('click', start);
 $('againBtn').addEventListener('click', start);
 $('restartBtn').addEventListener('click', start);
 $('resumeBtn').addEventListener('click', () => setPaused(false));
-$('learnBtn').addEventListener('click', () => { $('learnOverlay').hidden = false; $('learnBack').focus(); });
-$('learnBack').addEventListener('click', () => { $('learnOverlay').hidden = true; $('learnBtn').focus(); });
+let menuOpener = null;
+function menuTab(name){
+  document.querySelectorAll('.menutabs [role=tab]').forEach(t => t.setAttribute('aria-selected', String(t.dataset.tab === name)));
+  $('paneLaer').hidden = name !== 'laer'; $('paneTavle').hidden = name !== 'tavle'; $('paneKontr').hidden = name !== 'kontr';
+  if (name === 'tavle' && Date.now() - menuBoardAt > 10000){
+    const box = $('lbMenu'); box.textContent = 'Henter ledertavlen …';
+    menuBoardAt = Date.now();
+    lbFetch().then(res => renderBoard(box, res));
+  }
+}
+function openMenu(opener, tab){
+  menuOpener = opener || null;
+  $('menuRestart').hidden = !state.running;
+  menuTab(tab || 'laer');
+  $('menuOverlay').hidden = false;
+  $('menuBack').focus();
+}
+function closeMenu(){
+  $('menuOverlay').hidden = true;
+  if (menuOpener && !menuOpener.closest('[hidden]')) menuOpener.focus();
+}
+document.querySelectorAll('.menutabs [role=tab]').forEach(t => t.addEventListener('click', () => menuTab(t.dataset.tab)));
+$('menuBtnStart').addEventListener('click', e => openMenu(e.currentTarget));
+$('menuBtnPause').addEventListener('click', e => openMenu(e.currentTarget));
+$('menuBack').addEventListener('click', closeMenu);
+$('menuRestart').addEventListener('click', () => { $('menuOverlay').hidden = true; start(); });
 $('pauseBtn').addEventListener('click', () => setPaused(!state.paused));
 
 // tastatur
@@ -2592,6 +2655,7 @@ const keyMap = {
 };
 function setInput(path, v){ if (path.length === 1) input[path[0]] = v; else input[path[0]][path[1]] = v; }
 addEventListener('keydown', e => {
+  if (!$('menuOverlay').hidden){ if (e.code === 'Escape'){ closeMenu(); e.preventDefault(); } return; }
   const inField = e.target && e.target.tagName === 'INPUT';
   if (!inField && keyMap[e.code]){ setInput(keyMap[e.code], true); e.preventDefault(); }
   if (inField && e.code !== 'Escape') return;
