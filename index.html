@@ -1322,7 +1322,7 @@ function reset(){
   applyBoat();
   Object.assign(state, { running: false, paused: false, finished: false, t: 0, leg: 0, speed: 0, heel: 0, over: false, bump: 0 });
   // nytt vær hver gang: vindretning, faser, kastbånd og to byger på faste baner
-  WS.dir0 = (r() - 0.5) * 1.4;
+  WS.dir0 = (r() - 0.5) * TAU;                        // vinden kan komme fra alle kanter
   WS.ph = Array.from({ length: 6 }, () => r() * TAU);
   WS.band = [r() * WS.period, r() * WS.period];
   for (let n = 0; n < 80; n++){                       // start i frisk bris, ikke i stille
@@ -1757,11 +1757,21 @@ function drawWxBase(){
       const p = squallPos(i, state.t + s);
       ctx.beginPath(); ctx.arc(p.x * k, p.z * k, 1.5, 0, TAU); ctx.fill();
     }
-    const p = squallPos(i, tf);
-    ctx.beginPath(); ctx.arc(p.x * k, p.z * k, q.r * k, 0, TAU);
-    ctx.fillStyle = 'rgba(255,255,255,.4)'; ctx.fill();
-    ctx.setLineDash([3, 2]); ctx.lineWidth = 1.4; ctx.strokeStyle = INK_FIXED; ctx.stroke(); ctx.setLineDash([]);
-    ctx.fillStyle = INK_FIXED; ctx.fillText('B' + (i + 1), p.x * k, p.z * k + 0.5);
+    const p = squallPos(i, tf), cx = p.x * k, cz = p.z * k, R = q.r * k;
+    // sky: flere overlappende pufter med skygge under, og regnstreker
+    const puffs = [[-0.5, 0.12, 0.48], [-0.15, -0.22, 0.6], [0.32, -0.12, 0.52], [0.55, 0.14, 0.4], [0.05, 0.2, 0.5]];
+    ctx.save();
+    ctx.strokeStyle = 'rgba(22,48,63,.45)'; ctx.lineWidth = 1.2; ctx.lineCap = 'round';
+    ctx.beginPath();
+    for (let j = -2; j <= 2; j++){ const rx = cx + j * R * 0.28; ctx.moveTo(rx, cz + R * 0.55); ctx.lineTo(rx - R * 0.07, cz + R * 0.8 - Math.abs(j) * R * 0.08); }
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(96,118,138,.85)';
+    ctx.beginPath(); puffs.forEach(([ox, oz, pr]) => { ctx.moveTo(cx + ox * R + pr * R, cz + oz * R + R * 0.1); ctx.arc(cx + ox * R, cz + oz * R + R * 0.1, pr * R, 0, TAU); }); ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath(); puffs.forEach(([ox, oz, pr]) => { ctx.moveTo(cx + ox * R + pr * R, cz + oz * R); ctx.arc(cx + ox * R, cz + oz * R, pr * R, 0, TAU); }); ctx.fill();
+    ctx.restore();
+    ctx.fillStyle = INK_FIXED; ctx.font = `800 ${Math.round(10 * Math.min(sc, 1.5))}px Nunito, system-ui, sans-serif`;
+    ctx.fillText('B' + (i + 1), cx, cz + 1);
   });
 
   // havn og bøyer
