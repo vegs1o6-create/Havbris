@@ -5,10 +5,10 @@ Uten oppsett her lagres ledertavlen bare på den enheten som spiller. For at all
 1. Gå til https://console.firebase.google.com og velg **Add project** (Google Analytics kan slås av).
 2. I prosjektet: **Build → Realtime Database → Create database**. Velg region (f.eks. `europe-west1`) og start i **locked mode**.
 3. Fanen **Rules**: lim inn hele innholdet i `firebase-rules.json` og trykk **Publish**.
-4. Fanen **Data**: kopier URL-en øverst (f.eks. `https://havbris-xxxx-default-rtdb.europe-west1.firebasedatabase.app`).
+4. Fanen **Data**: kopier URL-en øverst (f.eks. `https://seilsim-xxxx-default-rtdb.europe-west1.firebasedatabase.app`).
 5. Lim URL-en inn i `config.js`:
    ```js
-   window.HAVBRIS_CONFIG = { leaderboardURL: "https://havbris-xxxx-default-rtdb.europe-west1.firebasedatabase.app" };
+   window.SEILSIM_CONFIG = { leaderboardURL: "https://seilsim-xxxx-default-rtdb.europe-west1.firebasedatabase.app" };
    ```
 6. Commit og push til `main`. Spillet henter og lagrer da tider mot databasen.
 

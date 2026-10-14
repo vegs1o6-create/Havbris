@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Havbris</title>
-<meta name="description" content="Havbris – et rolig, lyseblått seilspill i 3D med dynamisk vær, værkart og valg av vindstyrke.">
-<meta property="og:title" content="Havbris">
+<title>SeilSim</title>
+<meta name="description" content="SeilSim – et rolig, lyseblått seilspill i 3D med dynamisk vær, værkart og valg av vindstyrke.">
+<meta property="og:title" content="SeilSim">
 <meta property="og:description" content="Et rolig, lyseblått seilspill i 3D. Rund bøyene, les været og seil trygt i havn.">
 <meta name="theme-color" content="#eaf6fb">
 <link rel="manifest" href="manifest.webmanifest">
@@ -13,7 +13,7 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Havbris">
+<meta name="apple-mobile-web-app-title" content="SeilSim">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <style>
   html,body{ margin:0; height:100%; }
@@ -26,7 +26,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700&family=Nunito:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-  /* Havbris-tokens — hentet fra designsystemet «Havbris» (tokens.json) */
+  /* SeilSim-tokens — hentet fra designsystemet «SeilSim» (tokens.json) */
   :root{
     --surface-100:#eaf6fb; --surface-200:#d8edf5; --surface-300:#c3e2ee; --surface-400:#a7d0e0;
     --ink:#16303f; --ink-muted:#3f6478; --ink-faint:#6f8fa0;
@@ -447,7 +447,7 @@
 <div class="wrap" style="display:flex; flex-direction:column; flex:1;">
 
 <header>
-  <h1 class="brand">Havbris<small>Et rolig seilspill i myke farger.</small></h1>
+  <h1 class="brand">SeilSim<small>Et rolig seilspill i myke farger.</small></h1>
   <div class="header-actions">
     <button class="hb-button hb-button--ghost hb-button--sm" id="focusBtn" aria-pressed="false" title="Kameraet ser mot neste bøye">Se mål</button>
     <button class="hb-button hb-button--ghost hb-button--sm" id="wxBtn" aria-pressed="false" aria-controls="wxPanel">Kart</button>
@@ -657,7 +657,7 @@
   <div class="overlay" id="menuOverlay" hidden>
     <div class="hb-card learn" role="dialog" aria-modal="true" aria-labelledby="menuTitle">
       <div class="hb-card__eyebrow">Meny</div>
-      <h2 class="hb-card__title" id="menuTitle">Havbris</h2>
+      <h2 class="hb-card__title" id="menuTitle">SeilSim</h2>
       <div class="seg seg--3 menutabs" role="tablist" aria-label="Meny">
         <button type="button" role="tab" class="seg__btn" id="tabLaer" data-tab="laer" aria-selected="true" aria-controls="paneLaer">Lær</button>
         <button type="button" role="tab" class="seg__btn" id="tabTavle" data-tab="tavle" aria-selected="false" aria-controls="paneTavle">Ledertavle</button>
@@ -805,12 +805,12 @@
   window.addEventListener('error', e => {
     if (e.target && e.target.tagName === 'SCRIPT') document.getElementById('errorOverlay').hidden = false;
   }, true);
-  setTimeout(() => { if (!window.__havbrisReady) document.getElementById('errorOverlay').hidden = false; }, 12000);
+  setTimeout(() => { if (!window.__seilsimReady) document.getElementById('errorOverlay').hidden = false; }, 12000);
 </script>
 
 <script type="module">
 import * as THREE from 'three';
-window.__havbrisReady = true;
+window.__seilsimReady = true;
 if ('serviceWorker' in navigator) addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
 document.getElementById('errorOverlay').hidden = true;
 
@@ -840,7 +840,7 @@ function readColors(){
     colors[n] = cs.getPropertyValue('--' + n).trim();
   $('themeBtn').textContent = isDark() ? 'Dag' : 'Kveld';
 }
-try { const t = localStorage.getItem('havbris-theme'); if (t) root.dataset.theme = t; } catch (e) {}
+try { const t = localStorage.getItem('seilsim-theme'); if (t) root.dataset.theme = t; } catch (e) {}
 readColors();
 
 // ---------------------------------------------------------------------------
@@ -886,7 +886,7 @@ function applyTheme(){
 
 $('themeBtn').addEventListener('click', () => {
   root.dataset.theme = isDark() ? 'light' : 'dark';
-  try { localStorage.setItem('havbris-theme', root.dataset.theme); } catch (e) {}
+  try { localStorage.setItem('seilsim-theme', root.dataset.theme); } catch (e) {}
   applyTheme();
 });
 matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', applyTheme);
@@ -1329,7 +1329,7 @@ const BOATS = {
           trim: false, trimHull: 'M-10 -34 L10 -34 C14 -20 16 10 15 30 L-15 30 C-16 10 -14 -20 -10 -34 Z' },
 };
 let boatKey = 'kjol';
-try { const b = localStorage.getItem('havbris-boat'); if (BOATS[b]) boatKey = b; } catch (e) {}
+try { const b = localStorage.getItem('seilsim-boat'); if (BOATS[b]) boatKey = b; } catch (e) {}
 let pickBoat = boatKey;      // valget i menyen; boatKey er båten som faktisk seiler
 let B = BOATS[boatKey];
 let trimOpen = false;
@@ -1364,10 +1364,10 @@ const WIND_LEVELS = {
   kraftig: { label: 'Kraftig', base: 12.5, amp: 1.15, band: 3.5, sq: 0.55, min: 9.5, max: 19.0, start: [11.5, 14.5], title: 'Full storm i seilene' },
 };
 let windLevel = 'middels';
-try { const w = localStorage.getItem('havbris-wind'); if (WIND_LEVELS[w]) windLevel = w; } catch (e) {}
+try { const w = localStorage.getItem('seilsim-wind'); if (WIND_LEVELS[w]) windLevel = w; } catch (e) {}
 let pickWind = windLevel;
 let mode = 'klassisk';
-try { const m = localStorage.getItem('havbris-mode'); if (m === 'regatta' || m === 'klassisk') mode = m; } catch (e) {}
+try { const m = localStorage.getItem('seilsim-mode'); if (m === 'regatta' || m === 'klassisk') mode = m; } catch (e) {}
 let pickMode = mode;
 const WS = { dir0: 0, base: 9, ph: [0, 0, 0, 0, 0, 0], band: [0, 0], period: 900 };
 const SQ = [ { x0: 0, z0: 0, vx: 0, vz: 0, r: 50 }, { x0: 0, z0: 0, vx: 0, vz: 0, r: 50 } ];
@@ -2148,9 +2148,9 @@ function rgFinish(){
   $('finalTime').hidden = false;
   $('finalTime').textContent = fmtTime(tm);
   let best = null;
-  try { best = parseFloat(localStorage.getItem('havbris-rg-best')); } catch (e) {}
+  try { best = parseFloat(localStorage.getItem('seilsim-rg-best')); } catch (e) {}
   const isBest = !best || tm < best;
-  if (isBest){ try { localStorage.setItem('havbris-rg-best', String(tm)); } catch (e) {} }
+  if (isBest){ try { localStorage.setItem('seilsim-rg-best', String(tm)); } catch (e) {} }
   $('bestTime').hidden = !isBest;
   $('finishText').textContent = `Plass ${place} av 3 i regattaen.` + (R.pen ? ` Tiden inkluderer ${R.pen} s straff for å ha rørt merker.` : '') +
     (isBest ? ' Det er din raskeste regatta så langt.' : ` Din beste regatta er ${fmtTime(best)}.`);
@@ -2697,7 +2697,7 @@ function setWx(open){
   $('wxBtn').setAttribute('aria-pressed', String(open));
   $('wxBtn').classList.toggle('active', open);
   stage.classList.toggle('wx-open', open);
-  try { localStorage.setItem('havbris-wx', open ? 'on' : 'off'); } catch (e) {}
+  try { localStorage.setItem('seilsim-wx', open ? 'on' : 'off'); } catch (e) {}
   if (open){ wxResize(); wx.dirty = true; }
 }
 $('wxBtn').addEventListener('click', () => setWx(!wx.open));
@@ -2980,7 +2980,7 @@ const sound = (() => {
   let ctx = null, master = null, nodes = null, analyser = null;
   const MASTER = 3.2;
   let enabled = true;
-  try { enabled = localStorage.getItem('havbris-sound') !== 'off'; } catch (e) {}
+  try { enabled = localStorage.getItem('seilsim-sound') !== 'off'; } catch (e) {}
 
   function noiseBuffer(kind){
     const len = ctx.sampleRate * 4;
@@ -3105,7 +3105,7 @@ const sound = (() => {
   }
   function toggle(){
     enabled = !enabled;
-    try { localStorage.setItem('havbris-sound', enabled ? 'on' : 'off'); } catch (e) {}
+    try { localStorage.setItem('seilsim-sound', enabled ? 'on' : 'off'); } catch (e) {}
     resume();
     if (master) set(master.gain, enabled ? MASTER : 0, 0.05);
     render();
@@ -3171,7 +3171,7 @@ function renderPicks(){
 function setMode(k){
   if (k !== 'klassisk' && k !== 'regatta') return;
   pickMode = k;
-  try { localStorage.setItem('havbris-mode', k); } catch (e) {}
+  try { localStorage.setItem('seilsim-mode', k); } catch (e) {}
   renderPicks();
   if (!state.running && !state.finished) reset();          // startskjermen viser valgt område med en gang
 }
@@ -3179,13 +3179,13 @@ function setWindLevel(k){
   if (!WIND_LEVELS[k]) return;
   pickWind = k;
   if (!state.running) windLevel = k;
-  try { localStorage.setItem('havbris-wind', k); } catch (e) {}
+  try { localStorage.setItem('seilsim-wind', k); } catch (e) {}
   renderPicks();
 }
 function setBoat(k){
   if (!BOATS[k]) return;
   pickBoat = k;
-  try { localStorage.setItem('havbris-boat', k); } catch (e) {}
+  try { localStorage.setItem('seilsim-boat', k); } catch (e) {}
   if (!state.running){ boatKey = k; applyBoat(); }
   renderPicks();
 }
@@ -3243,10 +3243,10 @@ function start(){
 // Ledertavle — felles for alle via en liten Firebase-database (se LEDERTAVLE.md).
 // Uten oppsett i config.js lagres tidene bare på denne enheten.
 // ---------------------------------------------------------------------------
-const LB_URL = String((window.HAVBRIS_CONFIG && window.HAVBRIS_CONFIG.leaderboardURL) || '').trim().replace(/\/+$/, '');
+const LB_URL = String((window.SEILSIM_CONFIG && window.SEILSIM_CONFIG.leaderboardURL) || '').trim().replace(/\/+$/, '');
 let menuBoardAt = 0;
 const LB_N = 5;
-const LB_KEYS = { scores: 'havbris-lb-local', regatta: 'havbris-lb-regatta' };
+const LB_KEYS = { scores: 'seilsim-lb-local', regatta: 'seilsim-lb-regatta' };
 const fmtMs = ms => { const t = ms / 1000, m = Math.floor(t / 60); return `${m}:${(t - m * 60).toFixed(1).padStart(4, '0')}`; };
 const lbValid = r => r && typeof r.name === 'string' && typeof r.time === 'number' && BOATS[r.boat] && WIND_LEVELS[r.wind];
 const lbClean = n => String(n || '').replace(/[\u0000-\u001f\u007f<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, 16);
@@ -3333,7 +3333,7 @@ $('lbForm').addEventListener('submit', async e => {
   $('lbSave').disabled = true; $('lbMsg').textContent = 'Lagrer …';
   try {
     const out = await lbSubmit(entry, entry.path);
-    try { localStorage.setItem('havbris-name', name); } catch (err) {}
+    try { localStorage.setItem('seilsim-name', name); } catch (err) {}
     if (seq !== lbSeq) return;
     lbPending = null; $('lbForm').hidden = true; $('lbMsg').textContent = 'Tiden er lagret.';
     const res = await lbFetch(entry.path);
@@ -3346,7 +3346,7 @@ $('lbForm').addEventListener('submit', async e => {
     $('lbMsg').textContent = 'Fikk ikke lagret tiden. Sjekk nettforbindelsen og prøv igjen.';
   }
 });
-try { const n = localStorage.getItem('havbris-name'); if (n) $('lbName').value = lbClean(n); } catch (e) {}
+try { const n = localStorage.getItem('seilsim-name'); if (n) $('lbName').value = lbClean(n); } catch (e) {}
 
 function finish(){
   state.running = false; state.finished = true;
@@ -3356,9 +3356,9 @@ function finish(){
   $('finalTime').hidden = false;
   $('finalTime').textContent = fmtTime(t);
   let best = null;
-  try { best = parseFloat(localStorage.getItem('havbris3d-best')); } catch (e) {}
+  try { best = parseFloat(localStorage.getItem('seilsim-best')); } catch (e) {}
   const isBest = !best || t < best;
-  if (isBest){ try { localStorage.setItem('havbris3d-best', String(t)); } catch (e) {} }
+  if (isBest){ try { localStorage.setItem('seilsim-best', String(t)); } catch (e) {} }
   $('bestTime').hidden = !isBest;
   const info = state.runInfo || { boat: boatKey, wind: windLevel };
   $('finishText').textContent = isBest
@@ -3460,7 +3460,7 @@ reset();
 applyTheme();
 resize();
 let wxStart = false;                     // kartet åpnes med Kart-knappen; husker siste valg
-try { const v = localStorage.getItem('havbris-wx'); if (v) wxStart = v === 'on'; } catch (e) {}
+try { const v = localStorage.getItem('seilsim-wx'); if (v) wxStart = v === 'on'; } catch (e) {}
 setWx(wxStart);
 let last = performance.now();
 function frame(now){
@@ -3478,7 +3478,7 @@ function frame(now){
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
-window.__havbris = { state, input, update, reset, sound, finish, buoys, WS, SQ, clampWorld: () => WORLD, setBoat: k => setBoat(k), setMode: k => setMode(k), setWind: k => setWindLevel(k), start: () => start(), RG, polarAt, aiStep, rgProg, rgRanking, rgUpdate, WIND_LEVELS, getMode: () => mode };
+window.__seilsim = { state, input, update, reset, sound, finish, buoys, WS, SQ, clampWorld: () => WORLD, setBoat: k => setBoat(k), setMode: k => setMode(k), setWind: k => setWindLevel(k), start: () => start(), RG, polarAt, aiStep, rgProg, rgRanking, rgUpdate, WIND_LEVELS, getMode: () => mode };
 </script>
 
 </body>

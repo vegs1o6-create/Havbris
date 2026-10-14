@@ -1,4 +1,4 @@
-// Havbris – konfigurasjon for delt ledertavle.
+// SeilSim – konfigurasjon for delt ledertavle.
 // Lim inn Firebase Realtime Database-URL-en din mellom anførselstegnene (se LEDERTAVLE.md).
 // Tom streng = ledertavlen lagres kun lokalt på denne enheten.
-window.HAVBRIS_CONFIG = { leaderboardURL: "https://seilspill-ledertavle-default-rtdb.europe-west1.firebasedatabase.app" };
+window.SEILSIM_CONFIG = { leaderboardURL: "https://seilspill-ledertavle-default-rtdb.europe-west1.firebasedatabase.app" };
