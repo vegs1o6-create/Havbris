@@ -9,3 +9,7 @@ Velg mellom kjølbåt (to seil) og Optimist (ett sprisseil), og mellom rolig, mi
 **Regatta:** åpent hav, kun kjølbåt. Du har 3 minutter på å seile inn i startfeltet, så går en nedtelling på 45 sekunder. Start mellom to bøyer, rund tre merker (alle på styrbord side) og kryss mållinjen mellom to bøyer. Du seiler mot to AI-seilere, Mia og Jon. De følger en polar målt i spillets egen seilfysikk, ganget med en ferdighet under 1, og holdes litt tilbake når de leder og får litt hjelp når de ligger bak, så feltet blir jevnt. Egen ledertavle, se `LEDERTAVLE.md`.
 
 Hele spillet ligger i `index.html`, uten byggesteg.
+
+## Hvor spillet kjører
+
+Spillet spilles kun på `https://seiltips.no/seilsim/`. Denne repoen er kildekoden. Driftskopien ligger i `public/seilsim/` i repoet `seiltips`. Ved ny versjon: øk `VERSION` i `sw.js`, kopier `index.html`, `config.js`, `sw.js`, `manifest.webmanifest`, `icons/` og `vendor/` over til seiltips, og publiser der.
